@@ -1,11 +1,11 @@
 # platform
 
-Monorepo de utilidades, clases compartidas y convenciones de arquitectura para construir servicios del
-equipo de CRM (u otro equipo) sobre una base común: arquitectura hexagonal + DDD, TypeScript estricto, y una jerarquía
-de errores y de resultados consistente en toda la pila. Evita dentro de lo posible la dependencia de librerías de terceros, 
-para que cada proyecto pueda elegir sus propias implementaciones, dando soporte básico a lo esencial (HTTP, validación, logging, etc.) 
-y dejando que cada proyecto decida si quiere usar librerías más pesadas (zod, valibot, axios, etc.) para casos de uso más avanzados,
-logrando así un equilibrio entre consistencia, simplicidad y flexibilidad.
+Monorepo de utilidades, clases compartidas y convenciones de arquitectura para construir servicios sobre una base común: 
+arquitectura hexagonal + DDD, TypeScript estricto, y una jerarquía de errores y de resultados consistente en toda la pila. 
+Evita dentro de lo posible la dependencia de librerías de terceros, para que cada proyecto pueda elegir sus propias implementaciones, 
+dando soporte básico a lo esencial (HTTP, validación, logging, etc.) y dejando que cada proyecto decida si quiere usar 
+librerías más pesadas (zod, valibot, axios, etc.) para casos de uso más avanzados, logrando así un equilibrio entre consistencia, 
+simplicidad y flexibilidad.
 
 ## Qué incluye
 
@@ -31,12 +31,12 @@ resumen y un ejemplo end-to-end.
   `toScalars()`, así que se loguea y se serializa igual sin armar el payload a mano, y las propiedades
   propias de cada error (`orderId`, `ticketId`, etc.) viajan automáticamente.
 - **Result estándar en la capa de aplicación.** Todo caso de uso implementa `UseCase` y devuelve un
-  `ApplicationResult` en vez de lanzar errores de negocio esperados; `toHttpResponse` lo traduce
+  `ApplicationResult` en vez de lanzar errores de negocio esperados, `toHttpResponse` lo traduce
   directo a la respuesta HTTP correcta, sin que cada controller repita ese mapeo.
 - **Mismo dominio, distintos entornos de despliegue.** El código de `apps/` y `core/` no cambia entre
-  correr como servidor Node local o como Lambda: solo cambia el adaptador de `infrastructure/deployment`.
+  correr como servidor Node local o como Lambda, solo cambia el adaptador de `infrastructure/deployment`.
 - **Arquitectura verificable, no solo documentada.** `@platform/eslint-config` bloquea imports que
-  rompen la dirección de dependencias entre capas; `@platform/doctor` confirma que la estructura de
+  rompen la dirección de dependencias entre capas. `@platform/doctor` confirma que la estructura de
   carpetas existe donde se espera.
 - **TypeScript estricto de punta a punta**, módulos ESM nativos (`NodeNext`), sin dependencias pesadas
   por defecto (parseo de `.env` propio, validación desacoplada de cualquier librería concreta vía
