@@ -1,0 +1,29 @@
+# Node
+node_modules/
+
+# Typescript
+dist/
+
+# Turborepo
+.turbo/
+
+# Logs
+*.log
+
+# Environments
+.env.local
+
+# SO
+.DS_Store
+
+# Tests
+coverage/
+
+# Code Editors
+.idea
+.vscode
+.zed
+
+# Agents
+.claude
+CLAUDE.md
