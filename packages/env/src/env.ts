@@ -1,4 +1,4 @@
-import { boolean, enumOf, number, string } from "./schema/primitives.js";
+import { array, boolean, enumOf, json, number, port, string, url } from "./schema/primitives.js";
 import { object } from "./schema/object.js";
 
 // Zero-dependency default schema builder — implements the same Standard Schema interface a
@@ -10,4 +10,8 @@ export const env = {
   boolean,
   enum: enumOf,
   object,
+  array,
+  url,
+  port,
+  json,
 };

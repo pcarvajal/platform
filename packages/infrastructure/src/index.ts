@@ -7,6 +7,8 @@ export * from "./http/HttpServer.js";
 export * from "./http/HttpDispatcher.js";
 export * from "./http/HttpRoute.js";
 export * from "./http/HttpRouter.js";
+export * from "./http/HttpResponseCache.js";
+export * from "./http/withHttpCache.js";
 export * from "./http/toHttpError.js";
 export * from "./http/toHttpResponse.js";
 export * from "./http/validateRequest.js";

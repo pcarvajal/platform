@@ -1,3 +1,4 @@
+export * from "./src/InMemoryEventBus.js";
 export * from "./src/NodeConsoleLoggerClient.js";
 export * from "./src/NodeFetchRestClient.js";
 export * from "./src/NodeHttpRequestMapper.js";

@@ -1,6 +1,6 @@
 import { DomainEvent } from "./DomainEvent.js";
 
-export abstract class AggregateRoot {
+export abstract class AggregateRoot<TScalar = unknown> {
   private domainEvents: Array<DomainEvent>;
 
   protected constructor() {
@@ -18,5 +18,5 @@ export abstract class AggregateRoot {
     this.domainEvents.push(event);
   }
 
-  abstract toScalar(): any;
+  abstract toScalar(): TScalar;
 }

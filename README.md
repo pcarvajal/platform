@@ -12,12 +12,14 @@ simplicidad y flexibilidad.
 | Paquete                    | Qué resuelve                                                                                                                                                                       |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@platform/core`           | Dominio y aplicación: primitivas DDD (`ValueObject`, `AggregateRoot`, `Uuid`, `DomainEvent`), jerarquía de errores, `UseCase`/`ApplicationResult`, validación con Standard Schema. |
-| `@platform/infrastructure` | HTTP: `HttpRouter`, `createHttpDispatcher`, `HttpError` + subclases, `toHttpResponse`, `RestClient`, `EventBus`.                                                                   |
+| `@platform/infrastructure` | HTTP: `HttpRouter`, `createHttpDispatcher`, `HttpError` + subclases, `toHttpResponse`, `RestClient`, `EventBus`, `HttpResponseCache`/`withHttpCache`.                              |
 | `@platform/env`            | Carga y validación tipada de `process.env`, sin dependencias de terceros por defecto.                                                                                              |
-| `@platform/adapter-node`   | Implementación de referencia para correr un servicio como servidor HTTP local con Node.                                                                                            |
+| `@platform/adapter-node`   | Implementación de referencia para correr un servicio como servidor HTTP local con Node; incluye `InMemoryEventBus`.                                                                |
 | `@platform/adapter-aws`    | Implementación de referencia para correr un servicio como Lambda detrás de API Gateway.                                                                                            |
+| `@platform/adapter-redis`  | Redis: `RedisHttpResponseCache` (implementa `HttpResponseCache` de `infrastructure`) — read-through cache de respuestas HTTP con degradación a cache miss si Redis falla.          |
 | `@platform/eslint-config`  | Reglas de ESLint que verifican en CI la dirección de dependencias entre capas y los anti-patrones documentados.                                                                    |
 | `@platform/doctor`         | CLI que confirma que la estructura de carpetas de un proyecto sigue la convención esperada.                                                                                        |
+| `@platform/testing`        | Dobles de test: `InMemoryRepository`, `FakeLogger`, `buildHttpRequest`; reexporta `InMemoryEventBus` (adapter-node) para no reescribir los mismos fakes en cada proyecto.          |
 
 La convención completa vive en `packages/skills/company-platform/SKILL.md`; este README cubre el
 resumen y un ejemplo end-to-end.

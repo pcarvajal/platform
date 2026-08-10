@@ -1,6 +1,8 @@
 import { Uuid } from "./UuidValueObject.js";
 
-export abstract class DomainEvent {
+export abstract class DomainEvent<
+  TAttributes extends DomainEventAttributes = DomainEventAttributes,
+> {
   static EVENT_NAME: string;
 
   static fromScalars: (
@@ -22,7 +24,7 @@ export abstract class DomainEvent {
     this.eventName = eventName;
   }
 
-  abstract toScalars(): DomainEventAttributes;
+  abstract toScalars(): TAttributes;
 }
 
 export type DomainEventClass = {
@@ -35,4 +37,7 @@ export type DomainEventClass = {
   ): DomainEvent;
 };
 
-type DomainEventAttributes = any;
+// Static members can't reference a class's own type parameters (a TS limitation, not a design
+// choice) — `fromScalars`/`DomainEventClass` stay on this broader shape regardless of what a
+// subclass's `toScalars()` narrows `TAttributes` to.
+type DomainEventAttributes = Record<string, unknown>;
