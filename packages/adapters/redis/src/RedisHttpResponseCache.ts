@@ -1,6 +1,7 @@
 import type { Redis } from "ioredis";
 import type { Logger } from "@platform/core";
 import type { HttpResponse, HttpResponseCache } from "@platform/infrastructure";
+import { RedisCache } from "./RedisCache.js";
 
 type SerializedHttpResponse = {
   statusCode: number;
@@ -14,45 +15,25 @@ export type RedisHttpResponseCacheOptions = {
 };
 
 /**
- * A Redis-backed HttpResponseCache is a performance optimization, not a source of truth: a Redis
- * outage or a corrupted entry degrades to a cache miss (logged via `logger`, if provided) instead
- * of failing the request that's actually asking for data.
+ * Thin HTTP-shaped adapter over `RedisCache`: only handles the `HttpResponse` <->
+ * `SerializedHttpResponse` conversion needed to satisfy `HttpResponseCache` from
+ * `@platform/infrastructure`. All the Redis mechanics (degrading to a miss on failure, TTLs,
+ * key prefixing, logging) live in `RedisCache`.
  */
 export class RedisHttpResponseCache implements HttpResponseCache {
-  private readonly keyPrefix: string;
-  private readonly logger?: Logger;
+  private readonly cache: RedisCache<SerializedHttpResponse>;
 
-  constructor(
-    private readonly client: Redis,
-    options: RedisHttpResponseCacheOptions = {},
-  ) {
-    this.keyPrefix = options.keyPrefix ?? "http-cache:";
-    this.logger = options.logger;
+  constructor(client: Redis, options: RedisHttpResponseCacheOptions = {}) {
+    this.cache = new RedisCache(client, {
+      keyPrefix: options.keyPrefix ?? "http-cache:",
+      logger: options.logger,
+    });
   }
 
   async get(key: string): Promise<HttpResponse | undefined> {
-    let raw: string | null;
-    try {
-      raw = await this.client.get(this.prefixed(key));
-    } catch (err) {
-      this.logger?.warn("RedisHttpResponseCache.get failed, treating as cache miss", { key, err });
-      return undefined;
-    }
-    if (raw === null) return undefined;
-
-    try {
-      const parsed = JSON.parse(raw) as SerializedHttpResponse;
-      return { statusCode: parsed.statusCode, headers: new Map(parsed.headers), body: parsed.body };
-    } catch (err) {
-      this.logger?.warn(
-        "RedisHttpResponseCache.get found a malformed entry, treating as cache miss",
-        {
-          key,
-          err,
-        },
-      );
-      return undefined;
-    }
+    const parsed = await this.cache.get(key);
+    if (!parsed) return undefined;
+    return { statusCode: parsed.statusCode, headers: new Map(parsed.headers), body: parsed.body };
   }
 
   async set(key: string, response: HttpResponse, ttlSeconds?: number): Promise<void> {
@@ -61,19 +42,6 @@ export class RedisHttpResponseCache implements HttpResponseCache {
       headers: [...response.headers.entries()],
       body: response.body,
     };
-
-    try {
-      if (ttlSeconds) {
-        await this.client.set(this.prefixed(key), JSON.stringify(serialized), "EX", ttlSeconds);
-      } else {
-        await this.client.set(this.prefixed(key), JSON.stringify(serialized));
-      }
-    } catch (err) {
-      this.logger?.warn("RedisHttpResponseCache.set failed, response was not cached", { key, err });
-    }
-  }
-
-  private prefixed(key: string): string {
-    return `${this.keyPrefix}${key}`;
+    await this.cache.set(key, serialized, ttlSeconds);
   }
 }
