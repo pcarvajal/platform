@@ -1,9 +1,6 @@
 import { createServer } from "node:http";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
-import type {
-  HttpResponse,
-  HttpServer,
-} from "@platform/infrastructure";
+import type { HttpResponse, HttpServer } from "@platform/infrastructure";
 import { HttpServerCloseError } from "./HttpServerCloseError.js";
 import { HttpServerListenError } from "./HttpServerListenError.js";
 

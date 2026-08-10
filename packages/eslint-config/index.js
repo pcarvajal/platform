@@ -14,8 +14,7 @@ const ELEMENT_TYPES = [
   { type: "shared", pattern: "src/shared/**" },
 ];
 
-const platformErrorSelector =
-  "[superClass.name=/^(PlatformError|AdapterError)$/]";
+const platformErrorSelector = "[superClass.name=/^(PlatformError|AdapterError)$/]";
 const noExtendPlatformError = {
   selector: `ClassDeclaration${platformErrorSelector}, ClassExpression${platformErrorSelector}`,
   message:
@@ -68,12 +67,16 @@ export default tseslint.config(
         "error",
         {
           default: "disallow",
-          message: "${file.type} no puede importar de ${dependency.type} (ver SKILL.md § Dirección de dependencias).",
+          message:
+            "${file.type} no puede importar de ${dependency.type} (ver SKILL.md § Dirección de dependencias).",
           rules: [
             { from: "domain", allow: [] },
             { from: "application", allow: ["domain"] },
             { from: "apps", allow: ["application", "domain", "shared"] },
-            { from: "infrastructure", allow: ["apps", "application", "domain", "shared", "infrastructure"] },
+            {
+              from: "infrastructure",
+              allow: ["apps", "application", "domain", "shared", "infrastructure"],
+            },
             { from: "shared", allow: [] },
           ],
         },

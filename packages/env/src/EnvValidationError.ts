@@ -10,7 +10,7 @@ export type EnvValidationIssue = {
 // deliberately not mapped in `toHttpError`.
 export class EnvValidationError extends ApplicationError {
   readonly type = "EnvValidationError";
-  readonly origin = "@platform/env";
+  override readonly origin = "@platform/env";
 
   constructor(readonly issues: readonly EnvValidationIssue[]) {
     super(EnvValidationError.describe(issues));

@@ -1,12 +1,5 @@
-import {
-  ResponseMeta,
-  RestClient,
-  RestClientOptions,
-} from "@platform/infrastructure";
-import {
-  UpstreamServiceError,
-  UpstreamTimeoutError,
-} from "@platform/core";
+import { ResponseMeta, RestClient, RestClientOptions } from "@platform/infrastructure";
+import { UpstreamServiceError, UpstreamTimeoutError } from "@platform/core";
 
 export type NodeFetchRestClientConfig = {
   baseURL?: string;
@@ -91,10 +84,15 @@ export class NodeFetchRestClient implements RestClient {
       });
     } catch (err) {
       if (isTimeout(err)) {
-        throw new UpstreamTimeoutError(`Timeout in ${method} request to ${resolvedUrl}`, err);
+        throw new UpstreamTimeoutError(
+          `Timeout in ${method} request to ${resolvedUrl}`,
+          { method, url: resolvedUrl, timeoutMs },
+          err,
+        );
       }
       throw new UpstreamServiceError(
         `Network error in ${method} request to ${resolvedUrl}: ${err instanceof Error ? err.message : String(err)}`,
+        { method, url: resolvedUrl },
         err,
       );
     }
@@ -105,14 +103,18 @@ export class NodeFetchRestClient implements RestClient {
       } catch (err) {
         throw new UpstreamServiceError(
           `Invalid JSON response in ${method} request to ${resolvedUrl}`,
+          { method, url: resolvedUrl, statusCode: response.status },
           err,
         );
       }
     }
 
     const errorBody = await parseErrorBody(response);
-    throw new UpstreamServiceError(
-      `Error in ${method} request: ${response.status} - ${JSON.stringify(errorBody)}`,
-    );
+    throw new UpstreamServiceError(`Error in ${method} request: ${response.status}`, {
+      method,
+      url: resolvedUrl,
+      statusCode: response.status,
+      body: errorBody,
+    });
   }
 }

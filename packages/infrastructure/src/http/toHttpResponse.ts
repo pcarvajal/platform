@@ -1,5 +1,5 @@
 import type { ApplicationResult } from "@platform/core";
-import { ok } from "../ApiResponse.js";
+import { ok } from "../ports/ApiResponse.js";
 import {
   BadGatewayError,
   BadRequestError,

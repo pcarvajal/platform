@@ -19,10 +19,7 @@ export async function startLocalServer(
 ): Promise<NodeHttpServer> {
   const router = new HttpRouter(routes);
   const mapper = new NodeHttpRequestMapper();
-  const dispatch = createHttpDispatcher(
-    (req: IncomingMessage) => mapper.map(req),
-    router.dispatch,
-  );
+  const dispatch = createHttpDispatcher((req: IncomingMessage) => mapper.map(req), router.dispatch);
 
   const server = new NodeHttpServer(dispatch, router.describe());
   await server.listen(options.port);

@@ -98,10 +98,15 @@ function findDiContainerHints(projectRoot: string): string[] {
 }
 
 export function formatReport(report: DoctorReport): string {
-  const lines: string[] = [`doctor — estructura de "${report.srcDir}" (company-platform/SKILL.md)`, ""];
+  const lines: string[] = [
+    `doctor — estructura de "${report.srcDir}" (company-platform/SKILL.md)`,
+    "",
+  ];
 
   if (report.missingRequired.length === 0) {
-    lines.push("✔ estructura requerida completa (apps, core/application, infrastructure, env.ts, index.ts)");
+    lines.push(
+      "✔ estructura requerida completa (apps, core/application, infrastructure, env.ts, index.ts)",
+    );
   } else {
     lines.push("✘ faltan carpetas/archivos requeridos:");
     lines.push(...report.missingRequired.map((p) => `  - src/${p}`));
@@ -109,7 +114,9 @@ export function formatReport(report: DoctorReport): string {
 
   if (report.missingOptional.length > 0) {
     lines.push("");
-    lines.push("ℹ carpetas convencionales no presentes (opcionales según lo que necesite el proyecto):");
+    lines.push(
+      "ℹ carpetas convencionales no presentes (opcionales según lo que necesite el proyecto):",
+    );
     lines.push(...report.missingOptional.map((p) => `  - src/${p}`));
   }
 

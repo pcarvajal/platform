@@ -1,10 +1,10 @@
 # platform
 
-Monorepo de utilidades, clases compartidas y convenciones de arquitectura para construir servicios sobre una base común: 
-arquitectura hexagonal + DDD, TypeScript estricto, y una jerarquía de errores y de resultados consistente en toda la pila. 
-Evita dentro de lo posible la dependencia de librerías de terceros, para que cada proyecto pueda elegir sus propias implementaciones, 
-dando soporte básico a lo esencial (HTTP, validación, logging, etc.) y dejando que cada proyecto decida si quiere usar 
-librerías más pesadas (zod, valibot, axios, etc.) para casos de uso más avanzados, logrando así un equilibrio entre consistencia, 
+Monorepo de utilidades, clases compartidas y convenciones de arquitectura para construir servicios sobre una base común:
+arquitectura hexagonal + DDD, TypeScript estricto, y una jerarquía de errores y de resultados consistente en toda la pila.
+Evita dentro de lo posible la dependencia de librerías de terceros, para que cada proyecto pueda elegir sus propias implementaciones,
+dando soporte básico a lo esencial (HTTP, validación, logging, etc.) y dejando que cada proyecto decida si quiere usar
+librerías más pesadas (zod, valibot, axios, etc.) para casos de uso más avanzados, logrando así un equilibrio entre consistencia,
 simplicidad y flexibilidad.
 
 ## Qué incluye

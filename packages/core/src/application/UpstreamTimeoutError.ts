@@ -1,9 +1,9 @@
 import { ApplicationError } from "./ApplicationError.js";
 
 export class UpstreamTimeoutError extends ApplicationError {
-  type = "UpstreamTimeoutError";
-  readonly origin = "@platform/core";
-  constructor(message: string = "Upstream timeout", cause?: unknown) {
-    super(message, cause !== undefined ? { cause } : undefined);
+  readonly type = "UpstreamTimeoutError";
+  override readonly origin = "@platform/core";
+  constructor(message: string = "Upstream timeout", details?: unknown, cause?: unknown) {
+    super(message, { details, cause });
   }
 }

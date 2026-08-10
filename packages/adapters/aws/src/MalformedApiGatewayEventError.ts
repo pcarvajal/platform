@@ -1,7 +1,7 @@
 import { AdapterError } from "@platform/core";
 
 export class MalformedApiGatewayEventError extends AdapterError {
-  type = "MalformedApiGatewayEventError";
+  readonly type = "MalformedApiGatewayEventError";
 
   constructor(cause: unknown) {
     super(

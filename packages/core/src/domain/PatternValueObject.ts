@@ -22,6 +22,8 @@ export abstract class PatternValueObject extends ValueObject<string> {
   // Default: raises InvalidArgumentError with the offending value. Override only when a
   // subclass needs a more specific error (e.g. a domain-specific error type).
   protected throwErrorForInvalidValue(value: string): void {
-    throw new InvalidArgumentError(`<${this.constructor.name}> does not allow the value <${value}>`);
+    throw new InvalidArgumentError(
+      `<${this.constructor.name}> does not allow the value <${value}>`,
+    );
   }
 }

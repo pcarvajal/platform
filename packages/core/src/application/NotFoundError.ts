@@ -5,8 +5,8 @@ import { ApplicationError } from "./ApplicationError.js";
 // `toHttpError` (infrastructure) maps this one to it (404) at the HTTP boundary, so alias
 // on import if both are needed in the same file: `NotFoundError as CoreNotFoundError`.
 export class NotFoundError extends ApplicationError {
-  type = "NotFoundError";
-  readonly origin = "@platform/core";
+  readonly type = "NotFoundError";
+  override readonly origin = "@platform/core";
   constructor(message: string = "Not found", cause?: unknown) {
     super(message, cause !== undefined ? { cause } : undefined);
   }

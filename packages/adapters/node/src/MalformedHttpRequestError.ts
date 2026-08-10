@@ -5,15 +5,11 @@ import { AdapterError } from "@platform/core";
 // as coming from this package rather than from the app using it, and `cause` keeps the original
 // error.
 export class MalformedHttpRequestError extends AdapterError {
-  type = "MalformedHttpRequestError";
+  readonly type = "MalformedHttpRequestError";
 
   constructor(cause: unknown) {
-    super(
-      "@platform/adapter-node",
-      "Failed to parse the incoming HTTP request.",
-      {
-        cause,
-      },
-    );
+    super("@platform/adapter-node", "Failed to parse the incoming HTTP request.", {
+      cause,
+    });
   }
 }
