@@ -4,7 +4,9 @@ Skill de Claude Code / agentes que documenta la arquitectura hexagonal + DDD rec
 aplicaciones construidas sobre `@platform/{core,infrastructure,env,adapter-aws,adapter-node}`.
 
 No es un paquete npm: es contenido de skill, pensado para copiarse junto con los paquetes de la
-librería a un proyecto consumidor.
+librería a un proyecto consumidor. [`SKILL.md`](./SKILL.md) es el índice (filosofía, instalación, y
+qué archivo leer para cada pregunta); el detalle de cada tema vive en `references/*.md` — cargar
+solo el archivo relevante a la tarea en curso, no todo el contrato de una vez.
 
 ## Cómo instalarla en otro proyecto
 

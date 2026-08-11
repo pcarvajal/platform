@@ -9,3 +9,4 @@ export * from "./UpstreamServiceError.js";
 export * from "./IntegrationMismatchError.js";
 export * from "./ApplicationResult.js";
 export * from "./UseCase.js";
+export * from "./BaseUseCase.js";

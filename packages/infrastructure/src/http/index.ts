@@ -12,3 +12,4 @@ export * from "./withHttpCache.js";
 export * from "./toHttpError.js";
 export * from "./toHttpResponse.js";
 export * from "./validateRequest.js";
+export * from "./route.js";

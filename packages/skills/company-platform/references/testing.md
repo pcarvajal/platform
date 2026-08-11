@@ -1,0 +1,17 @@
+# `@platform/testing`
+
+> Referencia de `company-platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
+> `references/`.
+
+Dobles listos para usar en tests, para no reescribir en cada proyecto los mismos fakes (el
+`InMemoryTicketRepository` del `README.md` raíz es exactamente lo que este paquete generaliza).
+Pensado como `devDependency` — no viaja a producción.
+
+| Export                             | Firma real                                                                                                                                                                   | Uso típico                                                                                                                        |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `InMemoryRepository<TId, TEntity>` | `abstract class` con `save`/`findById`/`findAll`/`delete` sobre un `Map<TId, TEntity>` interno; `TEntity extends { id: { value: TId } }`.                                    | `class InMemoryOrderRepository extends InMemoryRepository<string, Order> {}` en vez de reescribir el `Map` en cada proyecto/test. |
+| `FakeLogger`                       | `extends Logger` (`core`); en vez de imprimir, acumula las llamadas en `calls.{info,error,warn,debug}` (ya pasadas por `this.mask`, igual que un logger real).               | `expect(fakeLogger.calls.error).toHaveLength(1)` en el test de un `UseCase` sin acoplarse a `console.*`.                          |
+| `buildHttpRequest(overrides?)`     | `(overrides?: Partial<HttpRequest>) => HttpRequest`. Devuelve un `HttpRequest` válido con defaults (`GET /`, sin headers/query/body) y lo que se pase en `overrides` encima. | Test de una `route()`/controller de `apps/` sin armar el objeto `HttpRequest` completo a mano.                                    |
+| `InMemoryEventBus`                 | Reexportado desde `@platform/adapter-node` — ver [`eventos.md`](./eventos.md). El mismo doble sirve para `deployment/local` y para tests.                                    | `const eventBus = new InMemoryEventBus(); eventBus.addSubscribers([...]);` en el setup de un test de integración.                 |
+| `InMemoryCache<T>`                 | `implements Cache<T>` (ver [`http.md`](./http.md)) sobre un `Map<string, T>` interno.                                                                                        | Doble de `Cache<T>` para tests de un `UseCase` que depende de cache sin pegarle a Redis real.                                     |
+| `FakeRestClient`                   | `implements RestClient` (ver [`http.md`](./http.md)); registra llamadas y devuelve respuestas pre-programadas.                                                               | Doble de `RestClient` para tests de integraciones salientes sin red real.                                                         |
