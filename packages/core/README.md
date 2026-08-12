@@ -132,6 +132,8 @@ Dos contextos transversales, de vida distinta:
   obligatorio en todo proyecto sobre esta convención — ver
   [`references/env.md`](../skills/platform/references/env.md). Extensible: `env.appContext(extra)`
   intersecta `AppContext` con lo que agregue el proyecto (`PORT`, `DATABASE_URL`, etc.).
+  `APP_ENVIRONMENT` es un union fijo de la plataforma (`AppEnvironment`/`APP_ENVIRONMENTS`:
+  `"development" | "staging" | "production"`), no configurable por proyecto.
 
 ## Primitivas de dominio
 

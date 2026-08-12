@@ -35,9 +35,9 @@ const schema = env.appContext({
 export const config = loadEnv(schema);
 ```
 
-`config` queda tipado según el schema (`{ APP_SERVICE_NAME: string; APP_ENVIRONMENT: string;
-APP_LOG_LEVEL: "debug" | "info" | "warn" | "error" | "silent"; PORT: number; DATABASE_URL: string;
-ALLOWED_ORIGINS: string[]; FEATURE_X: boolean | undefined }`), y el resto del proyecto recibe esos
+`config` queda tipado según el schema (`{ APP_SERVICE_NAME: string; APP_ENVIRONMENT: "development" |
+"staging" | "production"; APP_LOG_LEVEL: "debug" | "info" | "warn" | "error" | "silent"; PORT: number;
+DATABASE_URL: string; ALLOWED_ORIGINS: string[]; FEATURE_X: boolean | undefined }`), y el resto del proyecto recibe esos
 valores ya parseados por inyección de dependencias, sin volver a tocar `process.env`. `extra` se
 spreadea antes que las tres keys del contexto, así que no puede pisarlas — solo puede agregar
 campos nuevos.
@@ -65,7 +65,7 @@ import { z } from "zod";
 
 const schema = z.object({
   APP_SERVICE_NAME: z.string(),
-  APP_ENVIRONMENT: z.string(),
+  APP_ENVIRONMENT: z.enum(["development", "staging", "production"]),
   APP_LOG_LEVEL: z.enum(["debug", "info", "warn", "error", "silent"]),
   PORT: z.coerce.number().default(3000),
   DATABASE_URL: z.string(),
