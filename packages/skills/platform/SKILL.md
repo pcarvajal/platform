@@ -110,17 +110,18 @@ todo lo demás que valida algo en `@platform/*` (`@platform/env`'s `loadEnv` —
 
 ## Qué leer según la pregunta
 
-| Pregunta                                                                                           | Referencia                                                 |
-| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| ¿Qué carpeta le corresponde a esto? ¿Cuál es la dirección de dependencias?                         | [`references/estructura.md`](./references/estructura.md)   |
-| ¿Cómo extiendo un error propio? ¿Cómo se serializa un error para logging?                          | [`references/errores.md`](./references/errores.md)         |
-| ¿Cómo modelo una entidad, un value object, un agregado?                                            | [`references/dominio.md`](./references/dominio.md)         |
-| ¿Cómo escribo un caso de uso? ¿Cómo lo conecto a un endpoint HTTP?                                 | [`references/usecase.md`](./references/usecase.md)         |
-| ¿Qué primitivas HTTP existen (router, dispatcher, cache, `RestClient`)? ¿Dónde va un puerto nuevo? | [`references/http.md`](./references/http.md)               |
-| ¿Cómo publico/consumo un evento de dominio? ¿Cómo escribo un consumer async (SQS/EventBridge)?     | [`references/eventos.md`](./references/eventos.md)         |
-| ¿Cómo leo/valido variables de entorno?                                                             | [`references/env.md`](./references/env.md)                 |
-| ¿Qué dobles de test ya existen (`@platform/testing`)?                                              | [`references/testing.md`](./references/testing.md)         |
-| ¿Cómo se cablea todo sin contenedor de DI? ¿Cuándo creo una abstracción? ¿Qué anti-patrones evito? | [`references/composicion.md`](./references/composicion.md) |
+| Pregunta                                                                                           | Referencia                                                                            |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| ¿Qué carpeta le corresponde a esto? ¿Cuál es la dirección de dependencias?                         | [`references/estructura.md`](./references/estructura.md)                              |
+| ¿Cómo extiendo un error propio? ¿Cómo se serializa un error para logging?                          | [`references/errores.md`](./references/errores.md)                                    |
+| ¿Cómo modelo una entidad, un value object, un agregado?                                            | [`references/dominio.md`](./references/dominio.md)                                    |
+| ¿Cómo escribo un caso de uso? ¿Cómo lo conecto a un endpoint HTTP?                                 | [`references/usecase.md`](./references/usecase.md)                                    |
+| ¿Qué primitivas HTTP existen (router, dispatcher, cache, `RestClient`)? ¿Dónde va un puerto nuevo? | [`references/http.md`](./references/http.md)                                          |
+| ¿Cómo publico/consumo un evento de dominio? ¿Cómo escribo un consumer async (SQS/EventBridge)?     | [`references/eventos.md`](./references/eventos.md)                                    |
+| ¿Cómo leo/valido variables de entorno?                                                             | [`references/env.md`](./references/env.md)                                            |
+| ¿Qué dobles de test ya existen (`@platform/testing`)?                                              | [`references/testing.md`](./references/testing.md)                                    |
+| ¿Cómo se cablea todo sin contenedor de DI? ¿Cuándo creo una abstracción? ¿Qué anti-patrones evito? | [`references/composicion.md`](./references/composicion.md)                            |
+| ¿Cómo verifico que mi proyecto respeta la convención? ¿Cómo configuro el lint que la hace cumplir? | [`references/composicion.md`](./references/composicion.md) § `doctor`/`eslint-config` |
 
 Para el ejemplo end-to-end completo (servicio de tickets mínimo, HTTP local) ver también el
 `README.md` de la raíz del monorepo.
