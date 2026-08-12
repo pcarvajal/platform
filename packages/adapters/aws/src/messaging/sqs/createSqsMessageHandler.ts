@@ -4,7 +4,7 @@ import {
   type MessageRoute,
 } from "@platform/infrastructure";
 import type { SQSBatchResponse, SQSEvent } from "aws-lambda";
-import { mapSqsEvent } from "./SqsEventMapper.js";
+import { mapSqsEvent } from "./mapSqsEvent.js";
 
 // Wires createMessageDispatcher + mapSqsEvent + la respuesta de fallos parciales que SQS espera
 // (batchItemFailures) en un handler listo para exportar — mismo espíritu que createLambdaHandler

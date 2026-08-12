@@ -5,7 +5,7 @@ import {
 } from "@platform/infrastructure";
 import type { EventBridgeEvent } from "aws-lambda";
 import { EventBridgeDispatchError } from "./EventBridgeDispatchError.js";
-import { mapEventBridgeEvent } from "./EventBridgeEventMapper.js";
+import { mapEventBridgeEvent } from "./mapEventBridgeEvent.js";
 
 // A diferencia de createSqsMessageHandler, acá un ApplicationResult con `ok: false` se traduce a
 // una excepción — es la única forma de que el retry policy nativo de EventBridge/Lambda actúe,
