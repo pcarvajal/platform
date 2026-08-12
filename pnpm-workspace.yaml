@@ -4,3 +4,5 @@ packages:
   - "examples/*"
 allowBuilds:
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - handlebars@4.7.9

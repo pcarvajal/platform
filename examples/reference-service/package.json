@@ -18,16 +18,16 @@
     "@platform/core": "workspace:*",
     "@platform/env": "workspace:*",
     "@platform/infrastructure": "workspace:*",
-    "ioredis": "^5.4.1",
-    "zod": "^4.0.0"
+    "ioredis": "^5.11.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@platform/doctor": "workspace:*",
     "@platform/eslint-config": "workspace:*",
     "@platform/testing": "workspace:*",
-    "@types/node": "^22.10.0",
+    "@types/node": "^22.20.1",
     "eslint": "^10.8.0",
-    "typescript": "^5.7.0",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   }
 }

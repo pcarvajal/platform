@@ -226,10 +226,10 @@ importers:
         specifier: ^3.9.6
         version: 3.9.6
       turbo:
-        specifier: ^2.5.0
+        specifier: ^2.10.7
         version: 2.10.7
       typescript:
-        specifier: ^5.7.0
+        specifier: ^5.9.3
         version: 5.9.3
       typescript-eslint:
         specifier: ^8.66.0
@@ -259,10 +259,10 @@ importers:
         specifier: workspace:*
         version: link:../../packages/infrastructure
       ioredis:
-        specifier: ^5.4.1
+        specifier: ^5.11.1
         version: 5.11.1(supports-color@7.2.0)
       zod:
-        specifier: ^4.0.0
+        specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
       '@platform/doctor':
@@ -275,13 +275,13 @@ importers:
         specifier: workspace:*
         version: link:../../packages/testing
       '@types/node':
-        specifier: ^22.10.0
+        specifier: ^22.20.1
         version: 22.20.1
       eslint:
         specifier: ^10.8.0
         version: 10.8.0(supports-color@7.2.0)
       typescript:
-        specifier: ^5.7.0
+        specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.1.10
@@ -290,7 +290,7 @@ importers:
   packages/adapters/aws:
     dependencies:
       '@aws-lambda-powertools/logger':
-        specifier: ^2.15.0
+        specifier: ^2.34.0
         version: 2.34.0
       '@aws-sdk/client-dynamodb':
         specifier: ^3.1106.0
@@ -306,7 +306,7 @@ importers:
         version: link:../../infrastructure
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.149
+        specifier: ^8.10.162
         version: 8.10.162
 
   packages/adapters/node:
@@ -319,7 +319,7 @@ importers:
         version: link:../../infrastructure
     devDependencies:
       '@types/node':
-        specifier: ^22.10.0
+        specifier: ^22.20.1
         version: 22.20.1
 
   packages/adapters/redis:
@@ -331,29 +331,29 @@ importers:
         specifier: workspace:*
         version: link:../../infrastructure
       ioredis:
-        specifier: ^5.4.1
+        specifier: ^5.11.1
         version: 5.11.1(supports-color@7.2.0)
     devDependencies:
       '@types/node':
-        specifier: ^22.10.0
+        specifier: ^22.20.1
         version: 22.20.1
 
   packages/core:
     devDependencies:
       '@types/node':
-        specifier: ^22.10.0
+        specifier: ^22.20.1
         version: 22.20.1
 
   packages/create-app:
     devDependencies:
       '@types/node':
-        specifier: ^22.10.0
+        specifier: ^22.20.1
         version: 22.20.1
 
   packages/doctor:
     devDependencies:
       '@types/node':
-        specifier: ^22.10.0
+        specifier: ^22.20.1
         version: 22.20.1
 
   packages/env:
@@ -363,7 +363,7 @@ importers:
         version: link:../core
     devDependencies:
       '@types/node':
-        specifier: ^22.10.0
+        specifier: ^22.20.1
         version: 22.20.1
 
   packages/eslint-config:
@@ -378,10 +378,10 @@ importers:
         specifier: ^10.1.8
         version: 10.1.8(eslint@10.8.0(supports-color@7.2.0))
       eslint-import-resolver-typescript:
-        specifier: ^4.4.4
+        specifier: ^4.4.5
         version: 4.4.5(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)
       eslint-plugin-boundaries:
-        specifier: ^5.0.1
+        specifier: ^5.4.0
         version: 5.4.0(@typescript-eslint/parser@8.66.0(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.5(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0))(eslint@10.8.0(supports-color@7.2.0))(supports-color@7.2.0)
       globals:
         specifier: ^17.9.0
@@ -397,7 +397,7 @@ importers:
         version: link:../core
     devDependencies:
       '@types/node':
-        specifier: ^22.10.0
+        specifier: ^22.20.1
         version: 22.20.1
 
   packages/testing:
@@ -413,7 +413,7 @@ importers:
         version: link:../infrastructure
     devDependencies:
       '@types/node':
-        specifier: ^22.10.0
+        specifier: ^22.20.1
         version: 22.20.1
 
 packages:
