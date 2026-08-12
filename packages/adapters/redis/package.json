@@ -21,9 +21,9 @@
   "dependencies": {
     "@platform/core": "workspace:*",
     "@platform/infrastructure": "workspace:*",
-    "ioredis": "^5.4.1"
+    "ioredis": "^5.11.1"
   },
   "devDependencies": {
-    "@types/node": "^22.10.0"
+    "@types/node": "^22.20.1"
   }
 }
