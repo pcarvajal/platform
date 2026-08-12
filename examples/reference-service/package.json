@@ -8,20 +8,26 @@
     "lint": "eslint .",
     "dev": "tsc && node --env-file-if-exists=.env.local dist/infrastructure/deployment/local/server.js",
     "demo:consumer": "tsc && node dist/infrastructure/deployment/local/demoConsumer.js",
-    "doctor": "node ../../packages/doctor/dist/src/cli.js src"
+    "doctor": "node ../../packages/doctor/dist/src/cli.js src",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@platform/adapter-aws": "workspace:*",
     "@platform/adapter-node": "workspace:*",
+    "@platform/adapter-redis": "workspace:*",
     "@platform/core": "workspace:*",
     "@platform/env": "workspace:*",
     "@platform/infrastructure": "workspace:*",
+    "ioredis": "^5.4.1",
     "zod": "^4.0.0"
   },
   "devDependencies": {
     "@platform/doctor": "workspace:*",
     "@platform/eslint-config": "workspace:*",
+    "@platform/testing": "workspace:*",
     "@types/node": "^22.10.0",
     "eslint": "^10.8.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
   }
 }

@@ -24,7 +24,8 @@ bifurca en dos ramas con propósitos distintos:
 - **`PlatformError`** es exclusiva de estas librerías: la usan internamente para señalar que un
   error vino del propio framework (p. ej. `AdapterError`, extendida por
   `MalformedApiGatewayEventError`, `MalformedHttpRequestError`, `HttpServerListenError`,
-  `HttpServerCloseError`, `HttpRequestStreamError` — ver `deployment/aws` y `deployment/local` en
+  `HttpServerCloseError`, `HttpRequestStreamError`, `MalformedSqsEventError`,
+  `MalformedEventBridgeEventError` — ver `deployment/aws` y `deployment/local` en
   [`http.md`](./http.md)). **Nunca extiendas `PlatformError` ni `AdapterError` desde el código de tu
   proyecto** — no son tu punto de extensión, y hacerlo rompe la garantía de que
   `err instanceof PlatformError` significa "esto vino de la librería, no de mi app".
@@ -99,6 +100,13 @@ ejemplo arriba) en vez de forzar alguno de estos seis a un caso que no encaja.
 | `InvalidArgumentError`  | Implementación concreta de `DomainError` (`type = 'InvalidArgumentError'`), ya usada internamente por `ValueObject`/`Uuid` (ver [`dominio.md`](./dominio.md)).                       | Reutilizable directo para validaciones simples; para errores de negocio más específicos, extender `DomainError` en el propio `domain/` del proyecto.                                                   |
 | `UnreachableCaseError`  | Implementación concreta de `DomainError` (`type = 'UnreachableCaseError'`); `constructor(value: never)` — mensaje incluye el valor recibido serializado.                             | Es lo que lanza `assertNever` (fila de abajo) en runtime; no se instancia a mano.                                                                                                                      |
 | `assertNever(x: never)` | Lanza `UnreachableCaseError` si se invoca en runtime — algo que TypeScript debería impedir en compilación.                                                                           | Exhaustividad en `switch` sobre uniones discriminadas (VOs de tipo enum, eventos de dominio, etc.) — si se agrega un caso nuevo sin manejarlo, TypeScript marca error en el `default: assertNever(x)`. |
+
+**Mapeo a HTTP de los errores de `domain`:** al día de hoy solo `InvalidArgumentError` tiene
+mapeo explícito — `BadRequestError` (400), en `toHttpError.ts`/`toHttpResponse.ts` (ver
+[`http.md`](./http.md)). `UnreachableCaseError` no tiene mapeo propio y cae en el fallback
+genérico `InternalServerError` (500), igual que `UnexpectedError` de `application` — nunca
+debería llegar a un boundary HTTP de todos modos (`assertNever` solo dispara si TypeScript no
+cubrió un caso).
 
 Ver [`http.md`](./http.md) para `HttpError` y sus subclases (`BadRequestError`,
 `UnauthorizedError`, etc.) y el mapeo completo `type` → `HttpError`.

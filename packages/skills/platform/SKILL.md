@@ -2,10 +2,10 @@
 name: platform
 description: |
   Arquitectura hexagonal + DDD para construir aplicaciones sobre los paquetes de este monorepo
-  (@platform/core, /infrastructure, /adapter-aws, /adapter-node). Este archivo es el índice: filosofía,
-  instalación, y un mapa de qué archivo de references/ leer según la pregunta (estructura de carpetas,
-  jerarquía de errores, UseCase/ApplicationResult, primitivas HTTP, dominio, eventos, env, testing,
-  composición manual y anti-patrones).
+  (@platform/core, /infrastructure, /env, /adapter-aws, /adapter-node, /adapter-redis, /testing).
+  Este archivo es el índice: filosofía, instalación, y un mapa de qué archivo de references/ leer
+  según la pregunta (estructura de carpetas, jerarquía de errores, UseCase/ApplicationResult,
+  primitivas HTTP, dominio, eventos, env, testing, composición manual y anti-patrones).
 
   Usar cuando el usuario: crea una app o servicio nuevo sobre estos paquetes, decide dónde ubicar un
   caso de uso, entidad, repositorio o adaptador, estructura las carpetas de un proyecto backend nuevo,
@@ -110,17 +110,18 @@ todo lo demás que valida algo en `@platform/*` (`@platform/env`'s `loadEnv` —
 
 ## Qué leer según la pregunta
 
-| Pregunta                                                                                           | Referencia                                                 |
-| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| ¿Qué carpeta le corresponde a esto? ¿Cuál es la dirección de dependencias?                         | [`references/estructura.md`](./references/estructura.md)   |
-| ¿Cómo extiendo un error propio? ¿Cómo se serializa un error para logging?                          | [`references/errores.md`](./references/errores.md)         |
-| ¿Cómo modelo una entidad, un value object, un agregado?                                            | [`references/dominio.md`](./references/dominio.md)         |
-| ¿Cómo escribo un caso de uso? ¿Cómo lo conecto a un endpoint HTTP?                                 | [`references/usecase.md`](./references/usecase.md)         |
-| ¿Qué primitivas HTTP existen (router, dispatcher, cache, `RestClient`)? ¿Dónde va un puerto nuevo? | [`references/http.md`](./references/http.md)               |
-| ¿Cómo publico/consumo un evento de dominio? ¿Cómo escribo un consumer async (SQS/EventBridge)?     | [`references/eventos.md`](./references/eventos.md)         |
-| ¿Cómo leo/valido variables de entorno?                                                             | [`references/env.md`](./references/env.md)                 |
-| ¿Qué dobles de test ya existen (`@platform/testing`)?                                              | [`references/testing.md`](./references/testing.md)         |
-| ¿Cómo se cablea todo sin contenedor de DI? ¿Cuándo creo una abstracción? ¿Qué anti-patrones evito? | [`references/composicion.md`](./references/composicion.md) |
+| Pregunta                                                                                           | Referencia                                                                            |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| ¿Qué carpeta le corresponde a esto? ¿Cuál es la dirección de dependencias?                         | [`references/estructura.md`](./references/estructura.md)                              |
+| ¿Cómo extiendo un error propio? ¿Cómo se serializa un error para logging?                          | [`references/errores.md`](./references/errores.md)                                    |
+| ¿Cómo modelo una entidad, un value object, un agregado?                                            | [`references/dominio.md`](./references/dominio.md)                                    |
+| ¿Cómo escribo un caso de uso? ¿Cómo lo conecto a un endpoint HTTP?                                 | [`references/usecase.md`](./references/usecase.md)                                    |
+| ¿Qué primitivas HTTP existen (router, dispatcher, cache, `RestClient`)? ¿Dónde va un puerto nuevo? | [`references/http.md`](./references/http.md)                                          |
+| ¿Cómo publico/consumo un evento de dominio? ¿Cómo escribo un consumer async (SQS/EventBridge)?     | [`references/eventos.md`](./references/eventos.md)                                    |
+| ¿Cómo leo/valido variables de entorno?                                                             | [`references/env.md`](./references/env.md)                                            |
+| ¿Qué dobles de test ya existen (`@platform/testing`)?                                              | [`references/testing.md`](./references/testing.md)                                    |
+| ¿Cómo se cablea todo sin contenedor de DI? ¿Cuándo creo una abstracción? ¿Qué anti-patrones evito? | [`references/composicion.md`](./references/composicion.md)                            |
+| ¿Cómo verifico que mi proyecto respeta la convención? ¿Cómo configuro el lint que la hace cumplir? | [`references/composicion.md`](./references/composicion.md) § `doctor`/`eslint-config` |
 
 Para el ejemplo end-to-end completo (servicio de tickets mínimo, HTTP local) ver también el
 `README.md` de la raíz del monorepo.

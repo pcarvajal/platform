@@ -9,19 +9,20 @@ simplicidad y flexibilidad.
 
 ## Qué incluye
 
-| Paquete                    | Qué resuelve                                                                                                                                                                                     |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `@platform/core`           | Dominio y aplicación: primitivas DDD (`ValueObject`, `AggregateRoot`, `Uuid`, `DomainEvent`), jerarquía de errores, `UseCase`/`BaseUseCase`/`ApplicationResult`, validación con Standard Schema. |
-| `@platform/infrastructure` | HTTP: `HttpRouter`, `createHttpDispatcher`, `route()`, `HttpError` + subclases, `toHttpResponse`, `RestClient`, `EventBus`, `HttpResponseCache`/`withHttpCache`.                                 |
-| `@platform/env`            | Carga y validación tipada de `process.env`, sin dependencias de terceros por defecto.                                                                                                            |
-| `@platform/adapter-node`   | Implementación de referencia para correr un servicio como servidor HTTP local con Node; incluye `InMemoryEventBus`.                                                                              |
-| `@platform/adapter-aws`    | Implementación de referencia para correr un servicio como Lambda detrás de API Gateway.                                                                                                          |
-| `@platform/adapter-redis`  | Redis: `RedisHttpResponseCache` (implementa `HttpResponseCache` de `infrastructure`) — read-through cache de respuestas HTTP con degradación a cache miss si Redis falla.                        |
-| `@platform/eslint-config`  | Reglas de ESLint que verifican en CI la dirección de dependencias entre capas y los anti-patrones documentados.                                                                                  |
-| `@platform/doctor`         | CLI que confirma que la estructura de carpetas de un proyecto sigue la convención esperada.                                                                                                      |
-| `@platform/testing`        | Dobles de test: `InMemoryRepository`, `FakeLogger`, `buildHttpRequest`; reexporta `InMemoryEventBus` (adapter-node) para no reescribir los mismos fakes en cada proyecto.                        |
+| Paquete                    | Qué resuelve                                                                                                                                                                                                                           |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@platform/core`           | Dominio y aplicación: primitivas DDD (`ValueObject`, `AggregateRoot`, `Uuid`, `DomainEvent`), jerarquía de errores, `UseCase`/`BaseUseCase`/`ApplicationResult`, validación con Standard Schema.                                       |
+| `@platform/infrastructure` | HTTP: `HttpRouter`, `createHttpDispatcher`, `route()`, `HttpError` + subclases, `toHttpResponse`, `RestClient`, `EventBus`, `HttpResponseCache`/`withHttpCache`.                                                                       |
+| `@platform/env`            | Carga y validación tipada de `process.env`, sin dependencias de terceros por defecto. Incluye `env.appContext`, el contexto de aplicación obligatorio (`APP_SERVICE_NAME`/`APP_ENVIRONMENT`/`APP_LOG_LEVEL`), extensible por proyecto. |
+| `@platform/adapter-node`   | Implementación de referencia para correr un servicio como servidor HTTP local con Node; incluye `InMemoryEventBus`.                                                                                                                    |
+| `@platform/adapter-aws`    | Implementación de referencia para correr un servicio como Lambda detrás de API Gateway.                                                                                                                                                |
+| `@platform/adapter-redis`  | Redis: `RedisHttpResponseCache` (implementa `HttpResponseCache` de `infrastructure`) — read-through cache de respuestas HTTP con degradación a cache miss si Redis falla.                                                              |
+| `@platform/eslint-config`  | Reglas de ESLint que verifican en CI la dirección de dependencias entre capas y los anti-patrones documentados.                                                                                                                        |
+| `@platform/doctor`         | CLI que confirma que la estructura de carpetas de un proyecto sigue la convención esperada (incluido el contexto de aplicación obligatorio de `infrastructure/env.ts`).                                                                |
+| `@platform/testing`        | Dobles de test: `InMemoryRepository`, `FakeLogger`, `buildHttpRequest`; reexporta `InMemoryEventBus` (adapter-node) para no reescribir los mismos fakes en cada proyecto.                                                              |
+| `@platform/create-app`     | CLI que scaffoldea un proyecto nuevo siguiendo la convención completa, vendorizando los paquetes `@platform/*` necesarios dentro del workspace pnpm del proyecto generado.                                                             |
 
-La convención completa vive en `packages/skills/company-platform/SKILL.md`; este README cubre el
+La convención completa vive en `packages/skills/platform/SKILL.md`; este README cubre el
 resumen y un ejemplo end-to-end.
 
 ## Por qué
@@ -70,6 +71,8 @@ src
 │   │                      # (DynamoDB, Postgres...) en vez de delegarlo todo a `clients/`.
 │   └── env.ts             # requerido. Único punto de lectura de `process.env` en todo el
 │                          # proyecto — el resto recibe configuración ya parseada por inyección.
+│                          # Declara el contexto de aplicación obligatorio (env.appContext):
+│                          # APP_SERVICE_NAME / APP_ENVIRONMENT / APP_LOG_LEVEL.
 ├── shared                 # opcional. Utilidades exclusivas de este proyecto — no es un cajón
 │                          # genérico, lo reutilizable entre proyectos va a `@platform/*`.
 └── index.ts               # requerido. Barrel de exports públicos de la aplicación, sin lógica
@@ -119,7 +122,7 @@ export class Ticket {
 **`core/application/CreateTicket.ts`** — orquesta el caso de uso extendiendo `BaseUseCase` (el
 `try/catch` + `toApplicationSuccess`/`toApplicationFailure` es siempre el mismo, así que vive una
 sola vez en `@platform/core` en vez de repetirse en cada caso de uso — ver
-[`references/usecase.md`](packages/skills/company-platform/references/usecase.md) para la forma
+[`references/usecase.md`](packages/skills/platform/references/usecase.md) para la forma
 manual con `UseCase` directo, útil cuando `execute` necesita algo más que "correr `handle` y
 capturar"):
 
@@ -183,6 +186,20 @@ export const createTicketRoute = (createTicket: CreateTicket): HttpRoute => ({
 });
 ```
 
+**`infrastructure/env.ts`** — único punto de lectura de `process.env`; `env.appContext` trae ya
+cargado el contexto de aplicación obligatorio (`APP_SERVICE_NAME`/`APP_ENVIRONMENT`/`APP_LOG_LEVEL`),
+extendido acá con `PORT`:
+
+```ts
+import { env, loadEnv } from "@platform/env";
+
+const schema = env.appContext({
+  PORT: env.port().default(3000),
+});
+
+export const config = loadEnv(schema);
+```
+
 **`infrastructure/deployment/local/server.ts`** — composición manual, sin contenedor de DI:
 
 ```ts
@@ -191,13 +208,17 @@ import type { HttpRoute } from "@platform/infrastructure";
 import { createTicketRoute } from "../../../apps/createTicketRoute.js";
 import { CreateTicket } from "../../../core/application/CreateTicket.js";
 import { InMemoryTicketRepository } from "../../persistence/InMemoryTicketRepository.js";
+import { config } from "../../env.js";
 
 const logger = new NodeConsoleLoggerClient();
 const tickets = new InMemoryTicketRepository();
 
 const routes: HttpRoute[] = [createTicketRoute(new CreateTicket(tickets, logger))];
 
-await startLocalServer(routes, { port: 3000 });
+logger.info(
+  `Starting ${config.APP_SERVICE_NAME} (${config.APP_ENVIRONMENT}) on port ${config.PORT}`,
+);
+await startLocalServer(routes, { port: config.PORT });
 ```
 
 Cambiar este mismo servicio a AWS Lambda es escribir un `infrastructure/deployment/aws/handler.ts`
@@ -206,7 +227,7 @@ que cablea `createLambdaHandler` con las mismas `routes` y el mismo `AWSLoggerCl
 
 ## Documentación
 
-`packages/skills/company-platform/SKILL.md` es el índice de la convención completa — filosofía,
+`packages/skills/platform/SKILL.md` es el índice de la convención completa — filosofía,
 instalación, y un mapa de qué archivo de `references/` leer según la pregunta (estructura de
 carpetas, jerarquía de errores, `UseCase`/`ApplicationResult`, primitivas HTTP, eventos, `env`,
 testing, composición manual y anti-patrones que `@platform/eslint-config` y `@platform/doctor`

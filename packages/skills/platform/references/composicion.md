@@ -18,6 +18,27 @@ en el proyecto generado no debería reportar nada faltante ni fuera de convenci�
 No incluye `packages/adapters/aws` por defecto (solo Node local) — copiarlo a mano si el proyecto
 además despliega a Lambda, ver el `README.md` que el propio generador escribe en el proyecto.
 
+### `doctor`/`eslint-config` — verificar que el proyecto respeta la convención
+
+`@platform/doctor` (CLI standalone, corre desde el `dist/` de un proyecto consumidor — no en este
+monorepo) chequea el `src/` de ese proyecto contra la convención de [`estructura.md`](./estructura.md)
+por filesystem, sin AST:
+
+```sh
+pnpm exec doctor [path/to/src]   # default: ./src
+```
+
+Reporta carpetas/archivos requeridos que faltan, cualquier cosa fuera de la convención, y advierte
+si detecta un paquete de contenedor de DI (`tsyringe`, `inversify`, `awilix`, `reflect-metadata`)
+instalado — la señal de que se está a punto de romper la regla "composición manual por defecto" (ver
+Filosofía en `SKILL.md`). No reemplaza a `@platform/eslint-config`, que corre en cada build/CI y
+hace cumplir la dirección de dependencias (`boundaries/element-types`) y las dos reglas
+`no-restricted-syntax` (nunca extender `PlatformError`/`AdapterError` desde el proyecto, nunca leer
+`process.env` fuera de `infrastructure/env.ts`) a nivel de AST — `doctor` solo ve la estructura de
+carpetas/archivos, no el contenido del código. Un proyecto nuevo generado con `create-app` (abajo)
+ya trae ambos wireados; en un proyecto existente, copiar `packages/eslint-config` y extenderlo desde
+el propio `eslint.config.js` es la otra mitad de esta verificación.
+
 ### `doctor generate:*` — generar código nuevo ya correcto por construcción
 
 Dentro de un proyecto existente, `doctor` no solo verifica la convención — también genera las
@@ -33,7 +54,10 @@ no tener que copiar/adaptar un ejemplo a mano (ni para un asistente de IA, ni pa
 `srcDir` por defecto es `"src"`, igual que el check normal de `doctor`. Ninguno de los tres pisa un
 archivo existente — falla en vez de sobreescribir. El caso de uso se genera primero
 (`generate:usecase`); `generate:controller`/`generate:consumer` esperan que `<Nombre>` ya exista en
-`core/application/` (importan su tipo `<Nombre>Command`).
+`core/application/`. `generate:consumer` importa tanto la clase `<Nombre>` como su tipo
+`<Nombre>Command` (necesita el segundo para castear `envelope.body`); `generate:controller` solo
+importa la clase `<Nombre>` — el body del request se valida contra un schema de zod aparte, no
+contra `<Nombre>Command` directamente.
 
 ## Ejemplo end-to-end
 
