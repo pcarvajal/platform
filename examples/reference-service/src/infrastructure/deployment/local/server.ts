@@ -7,6 +7,7 @@ import {
 import type { HttpResponseCache, HttpRoute, RestClient } from "@platform/infrastructure";
 import { Redis } from "ioredis";
 import { createOrderRoute } from "../../../apps/createOrderRoute.js";
+import { ExportOrdersController } from "../../../apps/ExportOrdersController.js";
 import { getOrderRoute } from "../../../apps/getOrderRoute.js";
 import { listOrdersRoute } from "../../../apps/listOrdersRoute.js";
 import { OrderCreatedListener } from "../../../apps/OrderCreatedListener.js";
@@ -49,6 +50,7 @@ const createOrder = new CreateOrder(orderRepository, eventBus, logger);
 const getOrder = new GetOrder(orderRepository, logger);
 const listOrders = new ListOrders(orderRepository, logger);
 const shipOrder = new ShipOrder(orderRepository, eventBus, shippingProviderClient, logger);
+const exportOrdersController = new ExportOrdersController(listOrders);
 
 // El ruteo real vive acá — es lo único específico de este proyecto en este archivo (ver
 // references/composicion.md § "Ejemplo end-to-end"). HttpRouter (usado por dentro de
@@ -58,6 +60,13 @@ const routes: HttpRoute[] = [
   getOrderRoute(getOrder, cache),
   listOrdersRoute(listOrders),
   shipOrderRoute(shipOrder),
+  // El controller-clase es agnóstico del deployment: acá entra por el HttpRouter como una ruta
+  // más, y en AWS lo invoca su propia Lambda sin router (deployment/aws/exportOrdersHandler.ts).
+  {
+    method: "GET",
+    path: "/reports/orders.csv",
+    handle: (request) => exportOrdersController.handle(request),
+  },
 ];
 
 logger.info(

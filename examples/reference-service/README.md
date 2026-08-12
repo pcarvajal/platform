@@ -6,15 +6,23 @@ cantidad posible de features de `@platform/*` sin requerir infraestructura real 
 
 ## Endpoints
 
-| Método | Path               | Caso de uso   | Qué muestra                                                                                       |
-| ------ | ------------------ | ------------- | ------------------------------------------------------------------------------------------------- |
-| POST   | `/orders`          | `CreateOrder` | `route()`, `parseJsonBody`, VOs de dominio (`Sku`) validando el body, domain event `OrderCreated` |
-| GET    | `/orders/:id`      | `GetOrder`    | `route()` + `parsePathParams`, cache HTTP opcional (`withHttpCache` + Redis)                      |
-| GET    | `/orders`          | `ListOrders`  | Controller-clase manual, `parseQueryParams`, `EnumValueObject`, paginación (`ApiResponse`)        |
-| POST   | `/orders/:id/ship` | `ShipOrder`   | Controller-clase manual, errores de negocio propios mapeados a 409/422 a mano                     |
+| Método | Path                  | Caso de uso   | Qué muestra                                                                                           |
+| ------ | --------------------- | ------------- | ----------------------------------------------------------------------------------------------------- |
+| POST   | `/orders`             | `CreateOrder` | `route()`, `parseJsonBody`, VOs de dominio (`Sku`) validando el body, domain event `OrderCreated`     |
+| GET    | `/orders/:id`         | `GetOrder`    | `route()` + `parsePathParams`, cache HTTP opcional (`withHttpCache` + Redis)                          |
+| GET    | `/orders`             | `ListOrders`  | Controller-clase manual, `parseQueryParams`, `EnumValueObject`, paginación (`ApiResponse`)            |
+| POST   | `/orders/:id/ship`    | `ShipOrder`   | Controller-clase manual, errores de negocio propios mapeados a 409/422 a mano                         |
+| GET    | `/reports/orders.csv` | `ListOrders`  | `ExportOrdersController` (clase con `handle`), respuesta no-JSON con headers propios, Lambda dedicada |
 
 Más un consumer asíncrono (`ProcessOrderPaid`, vía `MessageRoute` + `withIdempotency`) para el
 evento `order.paid`.
+
+`apps/ExportOrdersController.ts` es el único controller-clase literal del ejemplo (una clase con
+`handle(request)`, `references/usecase.md` § "Forma manual"): `route()` no alcanza porque siempre
+pasa por `toHttpResponse`, que fija `application/json` y envuelve el resultado en `{ data }`,
+mientras que este endpoint devuelve un CSV con `Content-Type`/`Content-Disposition`/`X-Total-Count`
+propios. Es también el único que no se expone como `HttpRoute` en AWS: lo invoca su propia Lambda
+(ver "Deployment targets").
 
 ## Dominio
 
@@ -41,7 +49,7 @@ tratamiento especial para ese caso.
 
 ## Integraciones opcionales
 
-El proyecto arranca y sirve los cuatro endpoints sin ninguna configurada — cada una se activa solo
+El proyecto arranca y sirve los cinco endpoints sin ninguna configurada — cada una se activa solo
 si la variable correspondiente está seteada en `.env.local` (ver `src/infrastructure/env.ts`):
 
 - `REDIS_URL` — `GET /orders/:id` cachea su respuesta en Redis (`RedisHttpResponseCache`,
@@ -60,7 +68,12 @@ si la variable correspondiente está seteada en `.env.local` (ver `src/infrastru
   (`references/composicion.md` § "Ejemplo end-to-end"), cableados con `@platform/adapter-aws`:
   `httpHandler.ts` (`createLambdaHandler` + `AWSLoggerClient`) y `orderPaidConsumer.ts`
   (`createSqsMessageHandler`, siguiendo `references/eventos.md` § "consumer SQS con
-  idempotencia"). Sigue usando los repositorios/EventBus in-memory del demo — un deployment real
+  idempotencia"). `exportOrdersHandler.ts` es una tercera Lambda, dedicada a un solo endpoint
+  (`GET /reports/orders.csv`, otro timeout/memoria que el resto de la API): al no haber nada que
+  rutear, compone a mano `AWSApiGatewayEventHttpMapper` + `createHttpDispatcher` contra
+  `ExportOrdersController` en vez de usar `createLambdaHandler` (que arma un `HttpRouter`). El
+  mismo controller entra por el router en `deployment/local/server.ts` — la clase no sabe en cuál
+  de los dos vive. Sigue usando los repositorios/EventBus in-memory del demo — un deployment real
   reemplazaría eso por `DynamoDbRepository` (`@platform/adapter-aws`) y un `EventBus` respaldado en
   SNS/EventBridge, sin tocar `apps/` ni `core/`.
 
@@ -87,5 +100,6 @@ pnpm run dev              # POST http://localhost:3000/orders { "customerId": ".
                            # GET  http://localhost:3000/orders/:id
                            # GET  http://localhost:3000/orders?page=1&pageSize=20&status=paid
                            # POST http://localhost:3000/orders/:id/ship
+                           # GET  http://localhost:3000/reports/orders.csv?status=paid
 pnpm run demo:consumer    # simula la entrega (y redelivery) del evento async order.paid
 ```
