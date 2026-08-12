@@ -63,7 +63,11 @@ export function scaffold(options: ScaffoldOptions): void {
 function copyPackage(src: string, dest: string): void {
   cpSync(src, dest, {
     recursive: true,
-    filter: (source) => !EXCLUDED_ENTRIES.has(basename(source)),
+    // *.test.ts queda afuera: son tests de contrato de este monorepo (vitest, ver
+    // vitest.config.ts), no algo que un proyecto consumidor necesite en runtime — y el
+    // `tsconfig.json` vendorizado de cada paquete los incluye en `include`, así que copiarlos
+    // rompe el build del consumidor (que no tiene `vitest` como dependencia).
+    filter: (source) => !EXCLUDED_ENTRIES.has(basename(source)) && !source.endsWith(".test.ts"),
   });
 }
 
@@ -84,6 +88,7 @@ function projectFiles(projectName: string): ProjectFile[] {
     { path: "tsconfig.json", content: tsconfigJson() },
     { path: "eslint.config.js", content: eslintConfigJs() },
     { path: ".gitignore", content: gitignore() },
+    { path: ".env.example", content: envExample(projectName) },
     { path: "README.md", content: readmeMd(projectName) },
   ];
 }
@@ -104,7 +109,10 @@ export {};
 function envTs(): string {
   return `import { env, loadEnv } from "@platform/env";
 
-const schema = env.object({
+// env.appContext agrega APP_SERVICE_NAME/APP_ENVIRONMENT/APP_LOG_LEVEL, obligatorios en todo
+// proyecto sobre esta convención (ver platform/SKILL.md § env) — extendé el objeto que le pasás
+// con las vars propias de este proyecto, como PORT acá.
+const schema = env.appContext({
   PORT: env.port().default(3000),
 });
 
@@ -127,7 +135,7 @@ const logger = new NodeConsoleLoggerClient();
 // route()/controller.
 const routes: HttpRoute[] = [];
 
-logger.info(\`Starting local server on port \${config.PORT}\`);
+logger.info(\`Starting \${config.APP_SERVICE_NAME} (\${config.APP_ENVIRONMENT}) on port \${config.PORT}\`);
 await startLocalServer(routes, { port: config.PORT });
 `;
 }
@@ -149,7 +157,11 @@ function packageJson(projectName: string): string {
             '(cd "packages/$p" && pnpm run build); done',
           build: "tsc",
           lint: "eslint .",
-          dev: "tsc && node dist/infrastructure/deployment/local/server.js",
+          // --env-file-if-exists carga .env si existe (copiado de .env.example, ver README) sin
+          // necesitar el paquete dotenv, y no falla si no existe (p. ej. CI/deploy inyectando las
+          // vars directo) — Node ≥20.12, ver platform/SKILL.md § env.md. .env no versionado (ver
+          // .gitignore); .env.example sí.
+          dev: "tsc && node --env-file-if-exists=.env dist/infrastructure/deployment/local/server.js",
           // Invoca el archivo compilado directo en vez de depender del symlink de bin de
           // node_modules/.bin/doctor — pnpm crea ese symlink *antes* de correr `postinstall`
           // (que es lo que compila packages/doctor/dist), así que el symlink no se resuelve bien
@@ -213,6 +225,19 @@ function gitignore(): string {
   return "dist\nnode_modules\n.env\n";
 }
 
+function envExample(projectName: string): string {
+  // Copiar a .env (gitignored) para desarrollo local — `pnpm dev` lo carga vía `node --env-file`
+  // (ver packageJson(), script "dev"), sin necesitar el paquete dotenv (Node ≥20.6, platform/SKILL.md
+  // § env.md). Sin este archivo, `pnpm dev` en un proyecto recién generado falla con
+  // EnvValidationError sin ninguna pista de qué setear — APP_SERVICE_NAME/APP_ENVIRONMENT/
+  // APP_LOG_LEVEL son obligatorios y no tienen default.
+  return `APP_SERVICE_NAME=${projectName}
+APP_ENVIRONMENT=local
+APP_LOG_LEVEL=debug
+PORT=3000
+`;
+}
+
 function readmeMd(projectName: string): string {
   return `# ${projectName}
 
@@ -224,9 +249,11 @@ porqué). Cuando estos paquetes se publiquen a un registro real (\`.claude/plan-
 Fase 0), \`packages/\` deja de hacer falta y pasan a instalarse como cualquier dependencia de npm.
 
 1. \`pnpm install\` — instala dependencias y construye los paquetes vendorizados (\`postinstall\`).
-2. \`pnpm run doctor\` — confirma que \`src/\` sigue la convención de \`platform/SKILL.md\`
-   § Estructura de carpetas.
-3. \`pnpm dev\` — levanta el servidor local en el puerto de \`PORT\` (default 3000).
+2. \`cp .env.example .env\` — completá \`APP_SERVICE_NAME\`/\`APP_ENVIRONMENT\`/\`APP_LOG_LEVEL\`
+   (obligatorios, ver \`src/infrastructure/env.ts\`) y cualquier otra var que agregues ahí.
+3. \`pnpm run doctor\` — confirma que \`src/\` sigue la convención de \`platform/SKILL.md\`
+   § Estructura de carpetas, incluido el contexto de aplicación de \`env.ts\`.
+4. \`pnpm dev\` — levanta el servidor local en el puerto de \`PORT\` (default 3000).
 
 Si necesitás desplegar en AWS Lambda, copiá también \`packages/adapters/aws\` desde tu checkout de
 \`platform\` a \`packages/adapters/aws\` acá, agregalo a \`dependencies\` como

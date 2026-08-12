@@ -18,7 +18,8 @@ infraestructura.
 
 ```sh
 pnpm install
-pnpm run doctor         # confirma que src/ sigue la convención de SKILL.md
+cp .env.example .env.local   # APP_SERVICE_NAME/APP_ENVIRONMENT/APP_LOG_LEVEL son obligatorios, ver src/infrastructure/env.ts
+pnpm run doctor         # confirma que src/ sigue la convención de SKILL.md, incluido el contexto de env.ts
 pnpm run dev             # POST http://localhost:3000/orders { "customerId": "...", "items": ["..."] }
 pnpm run demo:consumer   # simula la entrega (y redelivery) de un evento async
 ```

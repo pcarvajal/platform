@@ -40,7 +40,7 @@ if (command?.startsWith("generate:")) {
   const srcDir = command ?? "src";
   const report = runDoctor(srcDir);
   console.log(formatReport(report));
-  if (report.missingRequired.length > 0) {
+  if (report.missingRequired.length > 0 || report.missingAppContextKeys.length > 0) {
     process.exitCode = 1;
   }
 }

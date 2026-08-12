@@ -17,5 +17,7 @@ eventBus.addSubscribers([new OrderCreatedListener(logger)]);
 
 const routes: HttpRoute[] = [createOrderRoute(new CreateOrder(orderRepository, eventBus, logger))];
 
-logger.info(`Starting reference-service on port ${config.PORT}`);
+logger.info(
+  `Starting ${config.APP_SERVICE_NAME} (${config.APP_ENVIRONMENT}) on port ${config.PORT}`,
+);
 await startLocalServer(routes, { port: config.PORT });

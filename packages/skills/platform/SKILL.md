@@ -12,7 +12,7 @@ description: |
   pregunta cómo instalar/consumir core, infrastructure o los adapters de este monorepo, o pide revisar
   si un módulo respeta la separación domain/application/infrastructure.
 metadata:
-  version: 2.0.0
+  version: 2.1.0
 ---
 
 # Company Platform — Arquitectura de aplicaciones

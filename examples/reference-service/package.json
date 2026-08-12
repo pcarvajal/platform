@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint .",
-    "dev": "tsc && node dist/infrastructure/deployment/local/server.js",
+    "dev": "tsc && node --env-file-if-exists=.env.local dist/infrastructure/deployment/local/server.js",
     "demo:consumer": "tsc && node dist/infrastructure/deployment/local/demoConsumer.js",
     "doctor": "node ../../packages/doctor/dist/src/cli.js src"
   },

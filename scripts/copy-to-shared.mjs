@@ -30,7 +30,7 @@ const OUTPUT_DIR = join(ROOT, "shared");
 // reescritura basada en texto no puede diferenciar eso de un import genuino, así que reescribirlo
 // corrompería en silencio el generador. Se excluye a propósito — si hace falta copiarlo, sacarlo
 // de esta lista y revisar scaffold.ts a mano después.
-const EXCLUDED_PACKAGES = new Set(["create-app","eslint-config"]);
+const EXCLUDED_PACKAGES = new Set(["create-app", "eslint-config"]);
 
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".mjs", ".cjs"]);
 const SKIP_DIR_NAMES = new Set(["node_modules", "dist", ".turbo"]);

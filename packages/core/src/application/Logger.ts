@@ -1,6 +1,15 @@
 import type { RequestContext } from "../platform/index.js";
 
 export type LogLevel = "error" | "info" | "warn" | "debug" | "silent";
+// Contraparte en runtime de LogLevel — necesaria para validar contra ella (p.ej. env.enum(LOG_LEVELS)
+// en @platform/env), ya que el union por sí solo no existe en tiempo de ejecución.
+export const LOG_LEVELS = [
+  "debug",
+  "info",
+  "warn",
+  "error",
+  "silent",
+] as const satisfies readonly LogLevel[];
 export type LogContext = Record<string, unknown>;
 
 const DEFAULT_SENSITIVE_KEYS = new Set([

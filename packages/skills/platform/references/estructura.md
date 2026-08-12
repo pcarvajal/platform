@@ -63,7 +63,9 @@ tiempo de lint y `@platform/doctor` verifica en el filesystem.
   forma (`save`/`findById`/`findAll`/`delete`) que `InMemoryRepository` (`@platform/testing`), solo
   hace falta declarar `toItem`/`fromItem` en la subclase. Ejemplo:
   `persistence/DynamoDbOrderRepository.ts`.
-- **`infrastructure/env.ts`** — único punto donde se lee `process.env` en todo el proyecto. Ver
+- **`infrastructure/env.ts`** — único punto donde se lee `process.env` en todo el proyecto. Declara
+  el contexto de aplicación obligatorio (`APP_SERVICE_NAME`/`APP_ENVIRONMENT`/`APP_LOG_LEVEL`, vía
+  `env.appContext`) — `@platform/doctor` lo valida igual que el resto de esta estructura. Ver
   [`env.md`](./env.md).
 - **`shared/`** _(opcional)_ — componentes reutilizables **exclusivos de esta aplicación**, no un
   cajón de utilidades genéricas. Todo lo que termine siendo útil entre varias aplicaciones debe
