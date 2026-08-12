@@ -19,7 +19,7 @@ Referencia completa: ver [`platform/SKILL.md`](../../skills/platform/SKILL.md)
 | `NodeHttpRequestMapper`              | `HttpRequestMapper<IncomingMessage>`      | Convierte un `IncomingMessage` de Node a `HttpRequest`.                                                                                                                                                                          |
 | `NodeFetchRestClient`                | `RestClient`                              | Cliente REST sobre `fetch` nativo — sin dependencias de terceros. Traduce fallos de red/timeout/status no-2xx a `UpstreamServiceError`/`UpstreamTimeoutError` con `details` estructurados (`{ method, url, statusCode, body }`). |
 | `InMemoryEventBus`                   | `EventBus`                                | Dispatcha eventos a los `DomainEventSubscriber` registrados, en el mismo proceso, sin broker — sirve tanto para `deployment/local` como para tests (también se reexporta desde `@platform/testing`).                             |
-| `NodeConsoleLoggerClient`            | `Logger` (`@platform/core`)               | Logueo a `console.*`, con el enmascarado de campos sensibles ya aplicado.                                                                                                                                                        |
+| `NodeConsoleLoggerClient`            | `Logger` (`@platform/core`)               | Logueo a `console.*`, con el enmascarado de campos sensibles ya aplicado y filtrado por nivel si se construye con uno (`NodeConsoleLoggerClient.fromAppContext(config)`).                                                        |
 
 ```ts
 // infrastructure/deployment/local/server.ts
@@ -32,7 +32,7 @@ import {
 import type { HttpRoute } from "@platform/infrastructure";
 import { config } from "../../env.js";
 
-const logger = new NodeConsoleLoggerClient();
+const logger = NodeConsoleLoggerClient.fromAppContext(config);
 const eventBus = new InMemoryEventBus();
 eventBus.addSubscribers([new OrderCreatedListener(logger)]);
 
@@ -52,8 +52,17 @@ await startLocalServer(routes, { port: config.PORT });
 aplicación obligatorio con `env.appContext` (`@platform/env`, ver
 [`references/env.md`](../../skills/platform/references/env.md)) — de ahí salen
 `APP_SERVICE_NAME`/`APP_ENVIRONMENT`, además de `PORT`/`PAYMENTS_API_URL` propios del proyecto.
-`NodeConsoleLoggerClient` no filtra por `APP_LOG_LEVEL` hoy (a diferencia de `AWSLoggerClient`, que
-sí acepta `logLevel`) — imprime cualquier nivel que se le pase.
+
+`NodeConsoleLoggerClient.fromAppContext(config)` es la forma recomendada de construirlo: aplica
+`APP_LOG_LEVEL` del contexto de aplicación, así que con `APP_LOG_LEVEL=warn` los `logger.info`/
+`logger.debug` del proyecto no se imprimen. El constructor directo sigue existiendo
+(`new NodeConsoleLoggerClient(sensitiveKeys?, level?)`) y **sin nivel no filtra nada** — imprime
+cualquier nivel que se le pase, igual que antes. Solo usa `APP_LOG_LEVEL` del contexto: `console.*`
+no tiene dónde poner el nombre del servicio sin cambiar el formato de línea (`[INFO] mensaje`), a
+diferencia de `AWSLoggerClient`, que sí lo emite como campo estructurado.
+
+Las líneas `[local] HTTP server listening…` que imprime `NodeHttpServer` al arrancar salen de
+`console.info` directo, no del `Logger` — no las afecta `APP_LOG_LEVEL`.
 
 Para un mapper o dispatcher distinto al default, compone `HttpRouter` + `createHttpDispatcher` a
 mano en vez de `startLocalServer` — sigue siendo composición manual y explícita. `startLocalServer`

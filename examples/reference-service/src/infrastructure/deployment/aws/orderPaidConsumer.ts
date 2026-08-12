@@ -21,7 +21,7 @@ class DemoIdempotencyStore {
   }
 }
 
-const logger = new AWSLoggerClient({ serviceName: config.APP_SERVICE_NAME });
+const logger = AWSLoggerClient.fromAppContext(config);
 const orderRepository = new InMemoryOrderRepository();
 const idempotencyStore = new DemoIdempotencyStore();
 

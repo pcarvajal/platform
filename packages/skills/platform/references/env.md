@@ -44,6 +44,11 @@ export const config = loadEnv(schema);
 de `@platform/core`, ver [`Logger`](../SKILL.md)) quedan disponibles junto al resto de `config`,
 igual que `PORT`/`DATABASE_URL` arriba.
 
+`APP_LOG_LEVEL` no se aplica solo: el que lo hace efectivo es el logger del deployment, construido
+con `NodeConsoleLoggerClient.fromAppContext(config)` o `AWSLoggerClient.fromAppContext(config)` (ver
+[`composicion.md`](./composicion.md)). Construirlo con `new` y sin nivel deja el logger imprimiendo
+todo, aunque `APP_LOG_LEVEL` esté declarada y validada.
+
 **No es opcional por convención**: `@platform/doctor` valida que `infrastructure/env.ts` declare
 las tres keys (chequeo de texto, no de AST — ver `packages/doctor/src/doctor.ts`) y falla si no
 están, igual que valida la estructura de carpetas. `@platform/create-app` genera `env.ts` ya con

@@ -20,7 +20,9 @@ import { InMemoryOrderRepository } from "../../persistence/InMemoryOrderReposito
 import { createShippingProviderClient } from "../../clients/rest/shippingProviderClient.js";
 import { config } from "../../env.js";
 
-const logger = new NodeConsoleLoggerClient();
+// fromAppContext aplica APP_LOG_LEVEL del contexto de aplicación (infrastructure/env.ts) — con
+// APP_LOG_LEVEL=info, los logger.debug de los casos de uso no se imprimen.
+const logger = NodeConsoleLoggerClient.fromAppContext(config);
 const orderRepository = new InMemoryOrderRepository();
 const eventBus = new InMemoryEventBus();
 eventBus.addSubscribers([new OrderCreatedListener(logger), new OrderShippedListener(logger)]);

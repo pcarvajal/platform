@@ -6,12 +6,12 @@ cantidad posible de features de `@platform/*` sin requerir infraestructura real 
 
 ## Endpoints
 
-| Método | Path            | Caso de uso    | Qué muestra                                                                                     |
-| ------ | --------------- | -------------- | ------------------------------------------------------------------------------------------------ |
-| POST   | `/orders`       | `CreateOrder`  | `route()`, `parseJsonBody`, VOs de dominio (`Sku`) validando el body, domain event `OrderCreated` |
-| GET    | `/orders/:id`   | `GetOrder`     | `route()` + `parsePathParams`, cache HTTP opcional (`withHttpCache` + Redis)                      |
-| GET    | `/orders`       | `ListOrders`   | Controller-clase manual, `parseQueryParams`, `EnumValueObject`, paginación (`ApiResponse`)         |
-| POST   | `/orders/:id/ship` | `ShipOrder` | Controller-clase manual, errores de negocio propios mapeados a 409/422 a mano                     |
+| Método | Path               | Caso de uso   | Qué muestra                                                                                       |
+| ------ | ------------------ | ------------- | ------------------------------------------------------------------------------------------------- |
+| POST   | `/orders`          | `CreateOrder` | `route()`, `parseJsonBody`, VOs de dominio (`Sku`) validando el body, domain event `OrderCreated` |
+| GET    | `/orders/:id`      | `GetOrder`    | `route()` + `parsePathParams`, cache HTTP opcional (`withHttpCache` + Redis)                      |
+| GET    | `/orders`          | `ListOrders`  | Controller-clase manual, `parseQueryParams`, `EnumValueObject`, paginación (`ApiResponse`)        |
+| POST   | `/orders/:id/ship` | `ShipOrder`   | Controller-clase manual, errores de negocio propios mapeados a 409/422 a mano                     |
 
 Más un consumer asíncrono (`ProcessOrderPaid`, vía `MessageRoute` + `withIdempotency`) para el
 evento `order.paid`.

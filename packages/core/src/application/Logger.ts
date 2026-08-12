@@ -12,6 +12,17 @@ export const LOG_LEVELS = [
 ] as const satisfies readonly LogLevel[];
 export type LogContext = Record<string, unknown>;
 
+// Severidad relativa de cada nivel, para que `shouldLog` pueda responder "¿este mensaje llega al
+// umbral configurado?" — el union `LogLevel` por sí solo no tiene orden. "silent" queda por encima
+// de todos los niveles logueables, así que ninguno lo alcanza y no se emite nada.
+const LOG_LEVEL_SEVERITY: Record<LogLevel, number> = {
+  debug: 10,
+  info: 20,
+  warn: 30,
+  error: 40,
+  silent: 100,
+};
+
 const DEFAULT_SENSITIVE_KEYS = new Set([
   "password",
   "token",
@@ -53,16 +64,33 @@ function maskSensitiveFields(obj: unknown, keys: Set<string>): unknown {
 
 export abstract class Logger {
   private readonly sensitiveKeys: Set<string>;
+  private readonly level: LogLevel | undefined;
 
-  constructor(extraSensitiveKeys: string[] = []) {
+  // `level` es opcional y va al final: sin él, `shouldLog` no filtra nada, así que toda subclase
+  // existente y todo `new NodeConsoleLoggerClient()` ya escrito se comportan exactamente igual que
+  // antes — agregar un parámetro opcional al final es aditivo (ver CONTRIBUTING.md § Logger).
+  constructor(extraSensitiveKeys: string[] = [], level?: LogLevel) {
     this.sensitiveKeys = new Set([
       ...DEFAULT_SENSITIVE_KEYS,
       ...extraSensitiveKeys.map((k) => k.toLowerCase()),
     ]);
+    this.level = level;
   }
 
   protected mask(context?: LogContext): LogContext | undefined {
     return context ? (maskSensitiveFields(context, this.sensitiveKeys) as LogContext) : undefined;
+  }
+
+  // Umbral de nivel del logger — el punto donde APP_LOG_LEVEL (contexto de aplicación, ver
+  // @platform/env) deja de ser un valor validado y sin uso y pasa a decidir qué se emite.
+  //
+  // Concreto (no abstracto) por la misma razón que `bind`: un método abstracto nuevo rompería toda
+  // subclase existente de Logger (CONTRIBUTING.md § Logger). Cada subclase decide invocarlo dentro
+  // de su propio info/error/warn/debug, igual que con `mask` — una que delegue el filtrado en su
+  // librería subyacente (AWSLoggerClient → powertools) simplemente no lo usa.
+  protected shouldLog(level: LogLevel): boolean {
+    if (this.level === undefined) return true;
+    return LOG_LEVEL_SEVERITY[level] >= LOG_LEVEL_SEVERITY[this.level];
   }
 
   abstract info(message: string, context?: LogContext): void;
@@ -80,6 +108,9 @@ export abstract class Logger {
   }
 }
 
+// No filtra por nivel a propósito: `super()` sin `level` deja `shouldLog` en "pasa todo" y el
+// filtrado real lo aplica el logger delegado, que es el que conoce su propio umbral. Filtrar acá
+// también significaría descartar mensajes dos veces con dos umbrales potencialmente distintos.
 class BoundLogger extends Logger {
   constructor(
     private readonly delegate: Logger,

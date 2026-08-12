@@ -73,8 +73,11 @@ import { getOrderRoute } from "../../../apps/getOrderRoute.js";
 import { CreateOrder } from "../../../core/application/CreateOrder.js";
 import { GetOrder } from "../../../core/application/GetOrder.js";
 import { InMemoryOrderRepository } from "../../persistence/InMemoryOrderRepository.js";
+import { config } from "../../env.js";
 
-const logger = new NodeConsoleLoggerClient();
+// fromAppContext aplica APP_LOG_LEVEL del contexto de aplicación (ver env.md) — construirlo con
+// `new NodeConsoleLoggerClient()` también funciona, pero no filtra por nivel.
+const logger = NodeConsoleLoggerClient.fromAppContext(config);
 const orderRepository = new InMemoryOrderRepository();
 
 // El ruteo real vive acá — es lo único específico del proyecto en este archivo.
@@ -85,7 +88,7 @@ const routes: HttpRoute[] = [
 
 // startLocalServer empaqueta HttpRouter + NodeHttpRequestMapper + createHttpDispatcher +
 // NodeHttpServer.listen — sigue siendo composición manual, solo agrupada en una llamada.
-await startLocalServer(routes, { port: 3000 });
+await startLocalServer(routes, { port: config.PORT });
 ```
 
 `createOrderRoute`/`getOrderRoute` son la forma por defecto (`route()`, ver
@@ -100,8 +103,9 @@ Node:
 ```ts
 // src/infrastructure/deployment/aws/handler.ts
 import { createLambdaHandler } from "@platform/adapter-aws";
-// ... mismo cableado de controllers/casos de uso que arriba, con AWSLoggerClient en vez de
-// NodeConsoleLoggerClient, y los mismos `routes` (HttpRoute no depende de ningún SDK).
+// ... mismo cableado de controllers/casos de uso que arriba, con
+// AWSLoggerClient.fromAppContext(config) en vez de NodeConsoleLoggerClient.fromAppContext(config),
+// y los mismos `routes` (HttpRoute no depende de ningún SDK).
 export const handler = createLambdaHandler(routes);
 ```
 

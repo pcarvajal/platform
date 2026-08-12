@@ -9,16 +9,22 @@ import { Logger } from "./Logger.js";
 class TestLogger extends Logger {
   readonly calls: { level: string; message: string; context?: LogContext }[] = [];
 
+  // Consulta `shouldLog` en cada método, igual que hace una subclase real que filtra por nivel
+  // (NodeConsoleLoggerClient) — sin nivel en el constructor no descarta nada.
   info(message: string, context?: LogContext): void {
+    if (!this.shouldLog("info")) return;
     this.calls.push({ level: "info", message, context });
   }
   error(message: string, context?: LogContext): void {
+    if (!this.shouldLog("error")) return;
     this.calls.push({ level: "error", message, context });
   }
   warn(message: string, context?: LogContext): void {
+    if (!this.shouldLog("warn")) return;
     this.calls.push({ level: "warn", message, context });
   }
   debug(message: string, context?: LogContext): void {
+    if (!this.shouldLog("debug")) return;
     this.calls.push({ level: "debug", message, context });
   }
 
@@ -95,6 +101,44 @@ describe("Logger#mask", () => {
   it("mask(undefined) devuelve undefined", () => {
     const logger = new TestLogger();
     expect(logger.exposeMask(undefined)).toBeUndefined();
+  });
+});
+
+describe("Logger#shouldLog", () => {
+  const levelsLogged = (logger: TestLogger): string[] => {
+    logger.debug("d");
+    logger.info("i");
+    logger.warn("w");
+    logger.error("e");
+    return logger.calls.map(({ level }) => level);
+  };
+
+  it("sin nivel en el constructor no filtra nada — comportamiento previo a APP_LOG_LEVEL", () => {
+    expect(levelsLogged(new TestLogger())).toEqual(["debug", "info", "warn", "error"]);
+  });
+
+  it('con nivel "debug" deja pasar los cuatro niveles', () => {
+    expect(levelsLogged(new TestLogger([], "debug"))).toEqual(["debug", "info", "warn", "error"]);
+  });
+
+  it("descarta todo lo que esté por debajo del nivel configurado", () => {
+    expect(levelsLogged(new TestLogger([], "warn"))).toEqual(["warn", "error"]);
+  });
+
+  it('con nivel "silent" no emite ningún nivel', () => {
+    expect(levelsLogged(new TestLogger([], "silent"))).toEqual([]);
+  });
+
+  it("el filtrado sigue aplicando a través de bind() — el umbral lo pone el logger delegado", () => {
+    const logger = new TestLogger([], "warn");
+    const bound = logger.bind({ requestId: "req-1", timestamp: new Date() });
+
+    bound.debug("descartado");
+    bound.error("emitido");
+
+    expect(logger.calls).toEqual([
+      { level: "error", message: "emitido", context: { requestId: "req-1" } },
+    ]);
   });
 });
 
