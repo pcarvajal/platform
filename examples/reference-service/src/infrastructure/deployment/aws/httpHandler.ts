@@ -23,7 +23,7 @@ import { config } from "../../env.js";
 // InMemoryOrderRepository por DynamoDbRepository (@platform/adapter-aws, ver
 // references/eventos.md § Patrón Outbox) y el EventBus por uno respaldado en SNS/EventBridge —
 // ninguno de los dos cambia una línea de apps/ ni de core/.
-const logger = new AWSLoggerClient({ serviceName: config.APP_SERVICE_NAME });
+const logger = AWSLoggerClient.fromAppContext(config);
 const orderRepository = new InMemoryOrderRepository();
 const eventBus = new InMemoryEventBus();
 eventBus.addSubscribers([new OrderCreatedListener(logger), new OrderShippedListener(logger)]);

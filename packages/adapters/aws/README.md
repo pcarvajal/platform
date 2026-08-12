@@ -107,11 +107,15 @@ recibe cada `UseCase`, no algo exclusivo del handler HTTP. `serviceName` es inde
 import { AWSLoggerClient } from "@platform/adapter-aws";
 import { config } from "../env.js";
 
-const logger = new AWSLoggerClient({
-  serviceName: config.APP_SERVICE_NAME,
-  logLevel: config.APP_LOG_LEVEL,
-});
+// Equivale a new AWSLoggerClient({ serviceName: config.APP_SERVICE_NAME,
+//                                 logLevel: config.APP_LOG_LEVEL })
+const logger = AWSLoggerClient.fromAppContext(config);
 ```
+
+`fromAppContext` acepta además `{ sensitiveKeys }` como segundo parámetro, para las claves que este
+proyecto quiera enmascarar más allá de las que `Logger` ya trae por defecto. El filtrado por nivel
+lo aplica powertools (no `Logger#shouldLog`), así que su override por `POWERTOOLS_LOG_LEVEL` sigue
+funcionando.
 
 ## Consumo
 

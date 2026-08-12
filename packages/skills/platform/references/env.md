@@ -33,15 +33,21 @@ const schema = env.appContext({
 // loadEnv valida sincrónicamente contra process.env y tira EnvValidationError si algo falta o
 // no matchea — se llama una sola vez acá, al importar el módulo, para que el proceso falle al
 // arrancar (cold start de Lambda o boot del server local) y no a mitad de un request. Sin las
-// tres vars de contexto, o con un APP_LOG_LEVEL fuera de debug/info/warn/error/silent, el proceso
-// no arranca.
+// tres vars de contexto, con un APP_ENVIRONMENT fuera de development/staging/production, o con un
+// APP_LOG_LEVEL fuera de debug/info/warn/error/silent, el proceso no arranca.
 export const config = loadEnv(schema);
 ```
 
-`config.APP_SERVICE_NAME` (string), `config.APP_ENVIRONMENT` (string — el proyecto define sus
-propios nombres de entorno, `env.appContext` no fija un enum) y `config.APP_LOG_LEVEL` (el mismo
-union `LogLevel` de `@platform/core`, ver [`Logger`](../SKILL.md)) quedan disponibles junto al
-resto de `config`, igual que `PORT`/`DATABASE_URL` arriba.
+`config.APP_SERVICE_NAME` (string), `config.APP_ENVIRONMENT` (union fijo
+`"development" | "staging" | "production"` — `AppEnvironment`/`APP_ENVIRONMENTS` en
+`@platform/core`, no configurable por proyecto) y `config.APP_LOG_LEVEL` (el mismo union `LogLevel`
+de `@platform/core`, ver [`Logger`](../SKILL.md)) quedan disponibles junto al resto de `config`,
+igual que `PORT`/`DATABASE_URL` arriba.
+
+`APP_LOG_LEVEL` no se aplica solo: el que lo hace efectivo es el logger del deployment, construido
+con `NodeConsoleLoggerClient.fromAppContext(config)` o `AWSLoggerClient.fromAppContext(config)` (ver
+[`composicion.md`](./composicion.md)). Construirlo con `new` y sin nivel deja el logger imprimiendo
+todo, aunque `APP_LOG_LEVEL` esté declarada y validada.
 
 **No es opcional por convención**: `@platform/doctor` valida que `infrastructure/env.ts` declare
 las tres keys (chequeo de texto, no de AST — ver `packages/doctor/src/doctor.ts`) y falla si no
@@ -61,7 +67,7 @@ caso general, no para `infrastructure/env.ts`), sigue disponible tal cual.
 | `env.url()` / `.port()`                                       | `url()` valida con `new URL(value)` (lanza issue si no parsea) y devuelve el string tal cual; `port()` valida un entero en el rango 1-65535.                                                                                                                                                                            | `DATABASE_URL: env.url()`, `PORT: env.port().default(3000)` — mismo builder, sin reinventar la validación en `env.ts`.      |
 | `env.array(itemSchema, { separator? })`                       | `<Schema extends StandardSchemaV1>(itemSchema: Schema, options?: { separator?: string }) => EnvValueSchema<InferOutput<Schema>[]>`. Separa `value` por `separator` (`","` por defecto) y valida cada token contra `itemSchema` — cualquier Standard Schema, no solo los de este builder.                                | `ALLOWED_ORIGINS: env.array(env.url())` para `"https://a.com,https://b.com"` sin un `.split(",")` a mano fuera de `env.ts`. |
 | `env.json(schema?)`                                           | `(schema?: StandardSchemaV1) => EnvValueSchema<unknown \| InferOutput<Schema>>`. Parsea `value` como JSON (issue si no es JSON válido) y, si se pasa `schema`, valida el resultado contra él.                                                                                                                           | `FEATURE_FLAGS: env.json(z.object({ betaUi: z.boolean() }))` sin un `JSON.parse` suelto fuera de `env.ts`.                  |
-| `env.appContext(extra?)`                                      | `<S extends Shape>(extra?: S) => StandardSchemaV1<..., AppContext & InferShape<S>>`. `env.object` con `APP_SERVICE_NAME`/`APP_ENVIRONMENT`/`APP_LOG_LEVEL` ya cargados; `extra` se spreadea antes que esas tres keys, así que no puede pisarlas.                                                                        | Preset obligatorio para `infrastructure/env.ts` — ver § "Contexto de aplicación obligatorio" arriba.                        |
+| `env.appContext(extra?)`                                      | `<S extends Shape>(extra?: S) => StandardSchemaV1<..., AppContext & InferShape<S>>`. `env.object` con `APP_SERVICE_NAME`/`APP_ENVIRONMENT`/`APP_LOG_LEVEL` ya cargados (`APP_ENVIRONMENT` restringido a `APP_ENVIRONMENTS`, `@platform/core`); `extra` se spreadea antes que esas tres keys, así que no puede pisarlas. | Preset obligatorio para `infrastructure/env.ts` — ver § "Contexto de aplicación obligatorio" arriba.                        |
 | `EnvValidationError`                                          | `extends ApplicationError` (`core`, ver [`errores.md`](./errores.md)); `readonly issues: {path?, message}[]`; `origin = '@platform/env'`. **No** está mapeado en `toHttpError` — nunca se espera en tiempo de request.                                                                                                  | Se captura solo en el arranque del proceso (o en tests de `env.ts`), no en controllers.                                     |
 | `StandardSchemaV1`                                            | Tipo (no runtime), re-exportado desde `@platform/core` por conveniencia — ver [Validación (Standard Schema)](../SKILL.md#validación-standard-schema).                                                                                                                                                                   | Permite tipar un schema propio o de terceros sin acoplar `env.ts` a la API concreta de ninguna librería.                    |
 

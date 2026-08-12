@@ -59,6 +59,9 @@ Adaptadores que ejecutan la aplicación en un entorno concreto. Dependencia: `de
     no matchea ninguna de las dos formas esperadas.
   - `AWSLoggerClient` — `extends Logger`; constructor recibe `{ serviceName, logLevel?,
 sensitiveKeys? }`, delega en `@aws-lambda-powertools/logger`.
+    `AWSLoggerClient.fromAppContext(config, { sensitiveKeys? })` es la forma recomendada: toma
+    `serviceName` de `APP_SERVICE_NAME` y el nivel de `APP_LOG_LEVEL` en vez de repetir ese
+    cableado en cada handler. El filtrado por nivel lo hace powertools, no `Logger#shouldLog`.
   - `createLambdaHandler(routes: HttpRoute[])` — ver tabla arriba.
 - **`deployment/local/`** — para levantar un servidor HTTP nativo de Node en desarrollo/local, usa
   `@platform/adapter-node`:
@@ -75,4 +78,6 @@ defaultHeaders?, defaultTimeoutMs? }`; usa `fetch` nativo + `AbortSignal.timeout
     timeout, error de red, respuesta no-2xx, o si una respuesta 2xx trae un body que no es JSON
     válido.
   - `NodeConsoleLoggerClient` — `extends Logger`; loguea a `console.*` con prefijo
-    `[INFO]/[ERROR]/[WARN]/[DEBUG]`.
+    `[INFO]/[ERROR]/[WARN]/[DEBUG]`. Constructor `(sensitiveKeys?, level?)`;
+    `NodeConsoleLoggerClient.fromAppContext(config, { sensitiveKeys? })` es la forma recomendada —
+    aplica `APP_LOG_LEVEL` vía `Logger#shouldLog`. Sin nivel no filtra: imprime todo.

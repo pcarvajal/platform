@@ -119,6 +119,15 @@ un `context`. `LogLevel` (`"error" | "info" | "warn" | "debug" | "silent"`) y su
 runtime `LOG_LEVELS` son el tipo/valores que consume `APP_LOG_LEVEL` del contexto de aplicación
 (ver abajo).
 
+El segundo parámetro opcional del constructor (`level?: LogLevel`) fija el umbral del logger, y
+`shouldLog(level)` — concreto, igual que `bind` — responde si un mensaje lo alcanza. Es el punto
+donde `APP_LOG_LEVEL` deja de ser un valor validado sin uso y pasa a decidir qué se emite. Cada
+subclase decide invocarlo dentro de su propio `info`/`error`/`warn`/`debug`, igual que con `mask`:
+`NodeConsoleLoggerClient` lo hace (`console` no tiene noción de nivel), `AWSLoggerClient` no
+(delega el filtrado en powertools). **Sin `level`, `shouldLog` deja pasar todo** — construir un
+`Logger` como siempre no cambia nada. En la práctica el nivel no se pasa a mano: se usa
+`NodeConsoleLoggerClient.fromAppContext(config)` / `AWSLoggerClient.fromAppContext(config)`.
+
 ## Contexto (`RequestContext` / `AppContext`)
 
 Dos contextos transversales, de vida distinta:
@@ -132,6 +141,8 @@ Dos contextos transversales, de vida distinta:
   obligatorio en todo proyecto sobre esta convención — ver
   [`references/env.md`](../skills/platform/references/env.md). Extensible: `env.appContext(extra)`
   intersecta `AppContext` con lo que agregue el proyecto (`PORT`, `DATABASE_URL`, etc.).
+  `APP_ENVIRONMENT` es un union fijo de la plataforma (`AppEnvironment`/`APP_ENVIRONMENTS`:
+  `"development" | "staging" | "production"`), no configurable por proyecto.
 
 ## Primitivas de dominio
 

@@ -232,7 +232,7 @@ function envExample(projectName: string): string {
   // EnvValidationError sin ninguna pista de qué setear — APP_SERVICE_NAME/APP_ENVIRONMENT/
   // APP_LOG_LEVEL son obligatorios y no tienen default.
   return `APP_SERVICE_NAME=${projectName}
-APP_ENVIRONMENT=local
+APP_ENVIRONMENT=development
 APP_LOG_LEVEL=debug
 PORT=3000
 `;
