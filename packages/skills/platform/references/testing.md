@@ -1,6 +1,6 @@
 # `@platform/testing`
 
-> Referencia de `company-platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
+> Referencia de `platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
 > `references/`.
 
 Dobles listos para usar en tests, para no reescribir en cada proyecto los mismos fakes (el

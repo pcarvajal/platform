@@ -4,7 +4,7 @@ Dobles de test para los puertos de `@platform/core`/`@platform/infrastructure`, 
 proyecto no reinvente un repositorio in-memory, un logger espiable o un cliente REST falso en cada
 suite de tests. Pensado como `devDependency` — no lleva nada de esto a producción.
 
-Referencia: [`company-platform/SKILL.md`](../skills/company-platform/SKILL.md) § `@platform/testing`.
+Referencia: [`platform/SKILL.md`](../skills/platform/SKILL.md) § `@platform/testing`.
 
 ## Qué provee
 

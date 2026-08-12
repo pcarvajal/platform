@@ -1,6 +1,6 @@
 # `infrastructure/` — HTTP, puertos y `deployment/`
 
-> Referencia de `company-platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
+> Referencia de `platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
 > `references/`.
 
 Todas las implementaciones dependientes de una tecnología específica. Aquí sí se usan SDKs, ORMs y

@@ -1,6 +1,6 @@
 # Composición manual, cuándo abstraer y anti-patrones
 
-> Referencia de `company-platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
+> Referencia de `platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
 > `references/`.
 
 ## Bootstrap de un proyecto nuevo (`@platform/create-app`)

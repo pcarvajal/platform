@@ -1,5 +1,5 @@
 ---
-name: company-platform
+name: platform
 description: |
   Arquitectura hexagonal + DDD para construir aplicaciones sobre los paquetes de este monorepo
   (@platform/core, /infrastructure, /adapter-aws, /adapter-node). Este archivo es el índice: filosofía,

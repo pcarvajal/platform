@@ -1,7 +1,7 @@
 # @platform/eslint-config
 
 Config de ESLint compartida que convierte en regla mecánica lo que
-[`company-platform/SKILL.md`](../skills/company-platform/SKILL.md) hoy solo describe en prosa: dirección
+[`platform/SKILL.md`](../skills/platform/SKILL.md) hoy solo describe en prosa: dirección
 de dependencias entre capas, jerarquía de errores y el punto único de lectura de `process.env`.
 
 ## Uso en un proyecto consumidor

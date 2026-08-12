@@ -8,7 +8,7 @@ export interface ScaffoldOptions {
   platformPath?: string;
 }
 
-// Los paquetes que un servicio HTTP local mínimo necesita — ver company-platform/SKILL.md §
+// Los paquetes que un servicio HTTP local mínimo necesita — ver platform/SKILL.md §
 // Instalación. `adapter-aws` queda fuera del set por defecto (solo hace falta si el target de
 // despliegue es AWS Lambda) — agregarlo a mano si el proyecto lo necesita.
 const VENDORED_PACKAGES = [
@@ -24,7 +24,7 @@ const VENDORED_PACKAGES = [
 const EXCLUDED_ENTRIES = new Set(["dist", "node_modules", ".turbo", "CHANGELOG.md"]);
 
 /**
- * Genera un proyecto nuevo siguiendo company-platform/SKILL.md § Estructura de carpetas, y
+ * Genera un proyecto nuevo siguiendo platform/SKILL.md § Estructura de carpetas, y
  * *copia* (no referencia con `file:`) los paquetes `@platform/*` necesarios dentro del propio
  * workspace pnpm del proyecto generado, usando `workspace:*` — es la vía de instalación
  * documentada en SKILL.md que hoy funciona de punta a punta ("si tu proyecto ya es un workspace
@@ -96,7 +96,7 @@ function write(fullPath: string, content: string): void {
 function indexTs(): string {
   return `// Barrel de exports públicos de esta aplicación (tipos/símbolos que otro servicio podría
 // importar). Sin lógica de arranque — eso vive en infrastructure/deployment/*. Ver
-// company-platform/SKILL.md § index.ts.
+// platform/SKILL.md § index.ts.
 export {};
 `;
 }
@@ -111,7 +111,7 @@ const schema = env.object({
 // loadEnv valida sincrónicamente contra process.env y tira EnvValidationError si algo falta o no
 // matchea — se llama una sola vez acá, al importar el módulo, para que el proceso falle al
 // arrancar y no a mitad de un request. Único punto donde se lee process.env en todo el proyecto
-// (ver company-platform/SKILL.md § infrastructure/env.ts).
+// (ver platform/SKILL.md § infrastructure/env.ts).
 export const config = loadEnv(schema);
 `;
 }
@@ -123,7 +123,7 @@ import { config } from "../../env.js";
 
 const logger = new NodeConsoleLoggerClient();
 
-// Agregá acá las rutas del proyecto — ver company-platform/SKILL.md § usecase.md para el patrón
+// Agregá acá las rutas del proyecto — ver platform/SKILL.md § usecase.md para el patrón
 // route()/controller.
 const routes: HttpRoute[] = [];
 
@@ -216,7 +216,7 @@ function gitignore(): string {
 function readmeMd(projectName: string): string {
   return `# ${projectName}
 
-Generado con \`@platform/create-app\` siguiendo la convención de \`company-platform/SKILL.md\`.
+Generado con \`@platform/create-app\` siguiendo la convención de \`platform/SKILL.md\`.
 Los paquetes \`@platform/*\` que este proyecto necesita quedaron copiados en \`packages/\` como
 workspace propio (\`workspace:*\`, ver \`pnpm-workspace.yaml\`) — es la vía de instalación que hoy
 funciona de punta a punta (ver el comentario en \`scaffold.ts\` de \`@platform/create-app\` para el
@@ -224,7 +224,7 @@ porqué). Cuando estos paquetes se publiquen a un registro real (\`.claude/plan-
 Fase 0), \`packages/\` deja de hacer falta y pasan a instalarse como cualquier dependencia de npm.
 
 1. \`pnpm install\` — instala dependencias y construye los paquetes vendorizados (\`postinstall\`).
-2. \`pnpm run doctor\` — confirma que \`src/\` sigue la convención de \`company-platform/SKILL.md\`
+2. \`pnpm run doctor\` — confirma que \`src/\` sigue la convención de \`platform/SKILL.md\`
    § Estructura de carpetas.
 3. \`pnpm dev\` — levanta el servidor local en el puerto de \`PORT\` (default 3000).
 

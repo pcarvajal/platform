@@ -1,6 +1,6 @@
 # `core/domain/` — entidades, value objects y agregados
 
-> Referencia de `company-platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
+> Referencia de `platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
 > `references/`.
 
 Entidades, agregados, objetos de valor, servicios de dominio y reglas de negocio. Debe permanecer

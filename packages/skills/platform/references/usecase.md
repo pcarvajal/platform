@@ -1,6 +1,6 @@
 # `UseCase`/`ApplicationResult` y `apps/`
 
-> Referencia de `company-platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
+> Referencia de `platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
 > `references/`.
 
 ## El estándar de respuesta de `core/application/`

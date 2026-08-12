@@ -1,6 +1,6 @@
 # example-reference-service
 
-Servicio de referencia ejecutable, combinando los dos ejes de `company-platform/SKILL.md` en un
+Servicio de referencia ejecutable, combinando los dos ejes de `platform/SKILL.md` en un
 solo proyecto real (no solo snippets de documentación):
 
 - **Eje HTTP (síncrono):** `POST /orders` — `CreateOrder` (`BaseUseCase`) vía `route()`, publica un

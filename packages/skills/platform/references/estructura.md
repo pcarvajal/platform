@@ -1,6 +1,6 @@
 # Estructura de carpetas y dirección de dependencias
 
-> Referencia de `company-platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
+> Referencia de `platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
 > `references/`.
 
 ## Árbol de carpetas

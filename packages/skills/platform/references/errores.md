@@ -1,6 +1,6 @@
 # Jerarquía de errores
 
-> Referencia de `company-platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
+> Referencia de `platform/SKILL.md`. Ver el índice para cuándo leer cada archivo de
 > `references/`.
 
 Todos los errores de `@platform/core` e `/infrastructure` (`packages/core/src/platform`) comparten

@@ -5,7 +5,7 @@ Node — y, hasta hoy, la única implementación de los puertos de `@platform/in
 son específicos de HTTP (`RestClient`, `EventBus`, `Logger`), reutilizable también en `deployment/aws`
 para lo que no depende de Lambda.
 
-Referencia completa: ver [`company-platform/SKILL.md`](../../skills/company-platform/SKILL.md)
+Referencia completa: ver [`platform/SKILL.md`](../../skills/platform/SKILL.md)
 § `infrastructure/deployment/`, tabla de primitivas HTTP.
 
 ## Qué provee

@@ -1,7 +1,7 @@
 # @platform/create-app
 
 CLI chica (sin dependencias externas, `node:fs`/`node:path`) que scaffoldea un proyecto nuevo
-siguiendo [`company-platform/SKILL.md`](../skills/company-platform/SKILL.md) § Estructura de
+siguiendo [`platform/SKILL.md`](../skills/platform/SKILL.md) § Estructura de
 carpetas, y _copia_ (no referencia con `file:`) los paquetes `@platform/*` que un servicio HTTP
 local mínimo necesita dentro del propio workspace pnpm del proyecto generado.
 
@@ -30,7 +30,7 @@ pnpm exec create-app <nombre-proyecto> --platform-path ../platform
   seguir resolviendo sus rutas relativas igual que dentro del monorepo original.
 - `src/{apps,core/application}/.gitkeep`, `src/infrastructure/env.ts` (esquema `PORT` con
   `@platform/env`) y `src/infrastructure/deployment/local/server.ts` (arranca `startLocalServer` de
-  `@platform/adapter-node`) — el esqueleto mínimo de `company-platform/SKILL.md` § Estructura de
+  `@platform/adapter-node`) — el esqueleto mínimo de `platform/SKILL.md` § Estructura de
   carpetas, listo para que `@platform/doctor` no reporte nada faltante.
 - `src/index.ts` — barrel vacío, sin lógica de arranque (eso vive en
   `infrastructure/deployment/*`).

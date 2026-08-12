@@ -7,7 +7,7 @@ validación (Standard Schema) sobre la que se construyen `@platform/env` e
 `@platform/infrastructure`.
 
 Referencia completa (firmas exactas, tabla de errores por defecto, ejemplos): ver
-[`company-platform/SKILL.md`](../skills/company-platform/SKILL.md) § Jerarquía de errores,
+[`platform/SKILL.md`](../skills/platform/SKILL.md) § Jerarquía de errores,
 § `core/`.
 
 ## Jerarquía de errores

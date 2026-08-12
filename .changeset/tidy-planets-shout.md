@@ -3,7 +3,7 @@
 ---
 
 New package: `@platform/create-app` — scaffolds a new project following
-`company-platform/SKILL.md` § Estructura de carpetas, and vendors the needed `@platform/*`
+`platform/SKILL.md` § Estructura de carpetas, and vendors the needed `@platform/*`
 packages into the generated project's own pnpm workspace (`workspace:*`, built in dependency
 order via `postinstall`). This is the installation path that actually resolves end to end today —
 see the corrected `SKILL.md` § Instalación: referencing a package with internal `@platform/*`

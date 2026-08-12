@@ -6,7 +6,7 @@ import type { OrderRepository } from "./OrderRepository.js";
 export type CreateOrderCommand = { customerId: string; items: string[] };
 
 // EventBus (@platform/infrastructure) es un puerto, no infraestructura local — un UseCase puede
-// depender de él directo (ver company-platform/references/http.md § "¿Dónde vive un puerto
+// depender de él directo (ver platform/references/http.md § "¿Dónde vive un puerto
 // nuevo?"): lo que la dirección de dependencias prohíbe es importar el `src/infrastructure/`
 // *propio* de este proyecto, no las interfaces de la librería.
 export class CreateOrder extends BaseUseCase<CreateOrderCommand, OrderScalars> {

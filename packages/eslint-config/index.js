@@ -5,7 +5,7 @@ import boundaries from "eslint-plugin-boundaries";
 import globals from "globals";
 
 // Mapea 1:1 la estructura de carpetas y la dirección de dependencias de
-// company-platform/SKILL.md ("Estructura de carpetas" / "Dirección de dependencias").
+// platform/SKILL.md ("Estructura de carpetas" / "Dirección de dependencias").
 const ELEMENT_TYPES = [
   { type: "domain", pattern: "src/core/domain/**" },
   { type: "application", pattern: "src/core/application/**" },

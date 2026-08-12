@@ -99,7 +99,7 @@ function findDiContainerHints(projectRoot: string): string[] {
 
 export function formatReport(report: DoctorReport): string {
   const lines: string[] = [
-    `doctor — estructura de "${report.srcDir}" (company-platform/SKILL.md)`,
+    `doctor — estructura de "${report.srcDir}" (platform/SKILL.md)`,
     "",
   ];
 
