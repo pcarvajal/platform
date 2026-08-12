@@ -227,8 +227,3 @@ pnpm changeset          # describe el cambio y elige el bump (patch/minor/major)
 de un error existente o en su mapeo a `HttpError` (`toHttpResponse`/`toHttpError`) — ese `type` es un
 contrato de datos entre servicios, no solo un tipo de compilación. Ver `CONTRIBUTING.md` para la
 tabla completa de qué cuenta como aditivo vs. breaking.
-
-> **Nota:** el registro privado de destino (GitHub Packages vs. AWS CodeArtifact) todavía no está
-> definido — ver `.claude/plan-implementacion-rediseno.md` Fase 0. Hasta que se resuelva, `changeset
-version` (bump + changelog) ya se puede correr localmente, pero `changeset publish` en CI queda
-> pendiente de wiring una vez elegido el registro.
