@@ -5,7 +5,7 @@ concreto) que el resto de la plataforma usa para hablar con el exterior: `RestCl
 `Cache<T>`. Depende solo de `@platform/core`.
 
 Referencia completa (firmas exactas, tabla de mapeo HTTP, ejemplo end-to-end): ver
-[`company-platform/SKILL.md`](../skills/company-platform/SKILL.md) § `infrastructure/`.
+[`platform/SKILL.md`](../skills/platform/SKILL.md) § `infrastructure/`.
 
 ## Estructura interna
 

@@ -13,7 +13,7 @@ carga sin código adicional.
 ## Uso en un proyecto
 
 Se usa dentro del único punto donde el proyecto debe leer `process.env`
-(`src/infrastructure/env.ts` en la convención de `company-platform`):
+(`src/infrastructure/env.ts` en la convención de `platform`):
 
 ```ts
 // src/infrastructure/env.ts

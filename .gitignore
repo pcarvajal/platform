@@ -4,6 +4,9 @@ node_modules/
 # Typescript
 dist/
 
+# Generado por scripts/copy-to-shared.mjs
+shared/
+
 # Turborepo
 .turbo/
 

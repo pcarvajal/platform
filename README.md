@@ -9,17 +9,17 @@ simplicidad y flexibilidad.
 
 ## Qué incluye
 
-| Paquete                    | Qué resuelve                                                                                                                                                                       |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@platform/core`           | Dominio y aplicación: primitivas DDD (`ValueObject`, `AggregateRoot`, `Uuid`, `DomainEvent`), jerarquía de errores, `UseCase`/`ApplicationResult`, validación con Standard Schema. |
-| `@platform/infrastructure` | HTTP: `HttpRouter`, `createHttpDispatcher`, `HttpError` + subclases, `toHttpResponse`, `RestClient`, `EventBus`, `HttpResponseCache`/`withHttpCache`.                              |
-| `@platform/env`            | Carga y validación tipada de `process.env`, sin dependencias de terceros por defecto.                                                                                              |
-| `@platform/adapter-node`   | Implementación de referencia para correr un servicio como servidor HTTP local con Node; incluye `InMemoryEventBus`.                                                                |
-| `@platform/adapter-aws`    | Implementación de referencia para correr un servicio como Lambda detrás de API Gateway.                                                                                            |
-| `@platform/adapter-redis`  | Redis: `RedisHttpResponseCache` (implementa `HttpResponseCache` de `infrastructure`) — read-through cache de respuestas HTTP con degradación a cache miss si Redis falla.          |
-| `@platform/eslint-config`  | Reglas de ESLint que verifican en CI la dirección de dependencias entre capas y los anti-patrones documentados.                                                                    |
-| `@platform/doctor`         | CLI que confirma que la estructura de carpetas de un proyecto sigue la convención esperada.                                                                                        |
-| `@platform/testing`        | Dobles de test: `InMemoryRepository`, `FakeLogger`, `buildHttpRequest`; reexporta `InMemoryEventBus` (adapter-node) para no reescribir los mismos fakes en cada proyecto.          |
+| Paquete                    | Qué resuelve                                                                                                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@platform/core`           | Dominio y aplicación: primitivas DDD (`ValueObject`, `AggregateRoot`, `Uuid`, `DomainEvent`), jerarquía de errores, `UseCase`/`BaseUseCase`/`ApplicationResult`, validación con Standard Schema. |
+| `@platform/infrastructure` | HTTP: `HttpRouter`, `createHttpDispatcher`, `route()`, `HttpError` + subclases, `toHttpResponse`, `RestClient`, `EventBus`, `HttpResponseCache`/`withHttpCache`.                                 |
+| `@platform/env`            | Carga y validación tipada de `process.env`, sin dependencias de terceros por defecto.                                                                                                            |
+| `@platform/adapter-node`   | Implementación de referencia para correr un servicio como servidor HTTP local con Node; incluye `InMemoryEventBus`.                                                                              |
+| `@platform/adapter-aws`    | Implementación de referencia para correr un servicio como Lambda detrás de API Gateway.                                                                                                          |
+| `@platform/adapter-redis`  | Redis: `RedisHttpResponseCache` (implementa `HttpResponseCache` de `infrastructure`) — read-through cache de respuestas HTTP con degradación a cache miss si Redis falla.                        |
+| `@platform/eslint-config`  | Reglas de ESLint que verifican en CI la dirección de dependencias entre capas y los anti-patrones documentados.                                                                                  |
+| `@platform/doctor`         | CLI que confirma que la estructura de carpetas de un proyecto sigue la convención esperada.                                                                                                      |
+| `@platform/testing`        | Dobles de test: `InMemoryRepository`, `FakeLogger`, `buildHttpRequest`; reexporta `InMemoryEventBus` (adapter-node) para no reescribir los mismos fakes en cada proyecto.                        |
 
 La convención completa vive en `packages/skills/company-platform/SKILL.md`; este README cubre el
 resumen y un ejemplo end-to-end.
@@ -116,36 +116,32 @@ export class Ticket {
 }
 ```
 
-**`core/application/CreateTicket.ts`** — orquesta el caso de uso, devuelve `ApplicationResult`:
+**`core/application/CreateTicket.ts`** — orquesta el caso de uso extendiendo `BaseUseCase` (el
+`try/catch` + `toApplicationSuccess`/`toApplicationFailure` es siempre el mismo, así que vive una
+sola vez en `@platform/core` en vez de repetirse en cada caso de uso — ver
+[`references/usecase.md`](packages/skills/company-platform/references/usecase.md) para la forma
+manual con `UseCase` directo, útil cuando `execute` necesita algo más que "correr `handle` y
+capturar"):
 
 ```ts
-import {
-  UseCase,
-  ApplicationResult,
-  Logger,
-  toApplicationSuccess,
-  toApplicationFailure,
-} from "@platform/core";
+import { BaseUseCase, type Logger } from "@platform/core";
 import { Ticket } from "../domain/Ticket.js";
 import type { TicketRepository } from "./TicketRepository.js";
 
 export type CreateTicketCommand = { subject: string };
 
-export class CreateTicket implements UseCase<CreateTicketCommand, Ticket> {
+export class CreateTicket extends BaseUseCase<CreateTicketCommand, Ticket> {
   constructor(
     private readonly tickets: TicketRepository,
-    private readonly logger: Logger,
-  ) {}
+    logger?: Logger,
+  ) {
+    super(logger);
+  }
 
-  async execute(command: CreateTicketCommand): Promise<ApplicationResult<Ticket>> {
-    try {
-      const ticket = Ticket.open(command.subject);
-      await this.tickets.save(ticket);
-      return toApplicationSuccess(ticket);
-    } catch (err) {
-      this.logger.error("CreateTicket failed", { err });
-      return toApplicationFailure(err);
-    }
+  protected async handle(command: CreateTicketCommand): Promise<Ticket> {
+    const ticket = Ticket.open(command.subject);
+    await this.tickets.save(ticket);
+    return ticket;
   }
 }
 ```
@@ -166,30 +162,25 @@ export class InMemoryTicketRepository implements TicketRepository {
 }
 ```
 
-**`apps/CreateTicketController.ts`** — traduce HTTP al caso de uso, y el `ApplicationResult` de vuelta
-a HTTP:
+**`apps/createTicketRoute.ts`** — traduce HTTP al caso de uso con `route()` (el `parseJsonBody` +
+`useCase.execute` + `toHttpResponse` también es siempre la misma forma para un endpoint con un solo
+caso de uso; un controller-clase manual sigue siendo el camino correcto cuando hace falta algo más
+que eso — headers custom, side effects antes/después):
 
 ```ts
-import {
-  parseJsonBody,
-  toHttpResponse,
-  type HttpRequest,
-  type HttpResponse,
-} from "@platform/infrastructure";
+import { route, parseJsonBody, type HttpRoute } from "@platform/infrastructure";
 import { z } from "zod";
-import { CreateTicket } from "../core/application/CreateTicket.js";
+import type { CreateTicket } from "../core/application/CreateTicket.js";
 
 const CreateTicketBody = z.object({ subject: z.string().min(1) });
 
-export class CreateTicketController {
-  constructor(private readonly createTicket: CreateTicket) {}
-
-  async handle(request: HttpRequest): Promise<HttpResponse> {
-    const body = parseJsonBody(request, CreateTicketBody);
-    const result = await this.createTicket.execute(body);
-    return toHttpResponse(result, { successStatusCode: 201 });
-  }
-}
+export const createTicketRoute = (createTicket: CreateTicket): HttpRoute => ({
+  method: "POST",
+  path: "/tickets",
+  handle: route(createTicket, (req) => parseJsonBody(req, CreateTicketBody), {
+    successStatusCode: 201,
+  }),
+});
 ```
 
 **`infrastructure/deployment/local/server.ts`** — composición manual, sin contenedor de DI:
@@ -197,17 +188,14 @@ export class CreateTicketController {
 ```ts
 import { startLocalServer, NodeConsoleLoggerClient } from "@platform/adapter-node";
 import type { HttpRoute } from "@platform/infrastructure";
-import { CreateTicketController } from "../../../apps/CreateTicketController.js";
+import { createTicketRoute } from "../../../apps/createTicketRoute.js";
 import { CreateTicket } from "../../../core/application/CreateTicket.js";
 import { InMemoryTicketRepository } from "../../persistence/InMemoryTicketRepository.js";
 
 const logger = new NodeConsoleLoggerClient();
 const tickets = new InMemoryTicketRepository();
-const createTicketController = new CreateTicketController(new CreateTicket(tickets, logger));
 
-const routes: HttpRoute[] = [
-  { method: "POST", path: "/tickets", handle: (req) => createTicketController.handle(req) },
-];
+const routes: HttpRoute[] = [createTicketRoute(new CreateTicket(tickets, logger))];
 
 await startLocalServer(routes, { port: 3000 });
 ```
@@ -218,6 +206,29 @@ que cablea `createLambdaHandler` con las mismas `routes` y el mismo `AWSLoggerCl
 
 ## Documentación
 
-`packages/skills/company-platform/SKILL.md` es la referencia completa: estructura de carpetas,
-dirección de dependencias, jerarquía de errores, convención de `UseCase`/`ApplicationResult`, y la
-lista de anti-patrones que `@platform/eslint-config` y `@platform/doctor` verifican.
+`packages/skills/company-platform/SKILL.md` es el índice de la convención completa — filosofía,
+instalación, y un mapa de qué archivo de `references/` leer según la pregunta (estructura de
+carpetas, jerarquía de errores, `UseCase`/`ApplicationResult`, primitivas HTTP, eventos, `env`,
+testing, composición manual y anti-patrones que `@platform/eslint-config` y `@platform/doctor`
+verifican).
+
+## Versionado y contribución
+
+Cada paquete de `packages/*` versiona semánticamente y publica su propio `CHANGELOG.md`, gestionado
+con [changesets](https://github.com/changesets/changesets). Antes de abrir un PR que cambie el
+contrato público de un paquete (agregar/quitar un export, cambiar una firma, renombrar un `type` de
+error):
+
+```sh
+pnpm changeset          # describe el cambio y elige el bump (patch/minor/major) por paquete afectado
+```
+
+`major` aplica no solo a cambios de firma de TypeScript, sino a cualquier cambio en el `type` string
+de un error existente o en su mapeo a `HttpError` (`toHttpResponse`/`toHttpError`) — ese `type` es un
+contrato de datos entre servicios, no solo un tipo de compilación. Ver `CONTRIBUTING.md` para la
+tabla completa de qué cuenta como aditivo vs. breaking.
+
+> **Nota:** el registro privado de destino (GitHub Packages vs. AWS CodeArtifact) todavía no está
+> definido — ver `.claude/plan-implementacion-rediseno.md` Fase 0. Hasta que se resuelva, `changeset
+version` (bump + changelog) ya se puede correr localmente, pero `changeset publish` en CI queda
+> pendiente de wiring una vez elegido el registro.

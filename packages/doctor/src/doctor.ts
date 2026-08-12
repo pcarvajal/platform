@@ -40,12 +40,18 @@ const KNOWN_CHILDREN: Record<string, string[]> = {
 // el equipo confirme conscientemente que ya pasó el punto de dolor de la composición manual.
 const DI_CONTAINER_PACKAGES = ["tsyringe", "inversify", "awilix", "reflect-metadata"];
 
+// Contexto de aplicación obligatorio (SKILL.md § env, @platform/env's env.appContext). Chequeo de
+// texto, no de AST — igual que el resto de doctor — así que basta con que las tres keys aparezcan
+// en el archivo (típicamente vía env.appContext({...})).
+const REQUIRED_APP_CONTEXT_KEYS = ["APP_SERVICE_NAME", "APP_ENVIRONMENT", "APP_LOG_LEVEL"];
+
 export interface DoctorReport {
   srcDir: string;
   missingRequired: string[];
   missingOptional: string[];
   unexpected: string[];
   diContainerHints: string[];
+  missingAppContextKeys: string[];
 }
 
 export function runDoctor(srcDir: string, projectRoot: string = process.cwd()): DoctorReport {
@@ -71,6 +77,7 @@ export function runDoctor(srcDir: string, projectRoot: string = process.cwd()): 
     missingOptional,
     unexpected,
     diContainerHints: findDiContainerHints(projectRoot),
+    missingAppContextKeys: findMissingAppContextKeys(srcDir),
   };
 }
 
@@ -83,6 +90,18 @@ function pathExists(fullPath: string, kind: EntryKind): boolean {
 function findUnexpectedChildren(dir: string, known: string[]): string[] {
   if (!existsSync(dir) || !statSync(dir).isDirectory()) return [];
   return readdirSync(dir).filter((name) => !known.includes(name));
+}
+
+function findMissingAppContextKeys(srcDir: string): string[] {
+  const envTsPath = join(srcDir, "infrastructure/env.ts");
+  if (!existsSync(envTsPath)) return []; // ya reportado vía missingRequired
+
+  const contents = readFileSync(envTsPath, "utf-8");
+  // env.appContext(...) ya trae las tres keys precargadas (ver @platform/env) — el texto de
+  // env.ts no las nombra literalmente en ese caso, así que un llamado al preset alcanza. Si no se
+  // usa el preset, exigimos que las tres keys aparezcan a mano (p. ej. env.object({ APP_SERVICE_NAME: ... })).
+  if (/\bappContext\s*\(/.test(contents)) return [];
+  return REQUIRED_APP_CONTEXT_KEYS.filter((key) => !contents.includes(key));
 }
 
 function findDiContainerHints(projectRoot: string): string[] {
@@ -98,10 +117,7 @@ function findDiContainerHints(projectRoot: string): string[] {
 }
 
 export function formatReport(report: DoctorReport): string {
-  const lines: string[] = [
-    `doctor — estructura de "${report.srcDir}" (company-platform/SKILL.md)`,
-    "",
-  ];
+  const lines: string[] = [`doctor — estructura de "${report.srcDir}" (platform/SKILL.md)`, ""];
 
   if (report.missingRequired.length === 0) {
     lines.push(
@@ -124,6 +140,15 @@ export function formatReport(report: DoctorReport): string {
     lines.push("");
     lines.push("⚠ entradas fuera de la convención de SKILL.md § Estructura de carpetas:");
     lines.push(...report.unexpected.map((p) => `  - src/${p}`));
+  }
+
+  if (report.missingAppContextKeys.length > 0) {
+    lines.push("");
+    lines.push(
+      "✘ infrastructure/env.ts no declara el contexto de aplicación obligatorio " +
+        "(SKILL.md § env, @platform/env's env.appContext) — faltan:",
+    );
+    lines.push(...report.missingAppContextKeys.map((k) => `  - ${k}`));
   }
 
   if (report.diContainerHints.length > 0) {

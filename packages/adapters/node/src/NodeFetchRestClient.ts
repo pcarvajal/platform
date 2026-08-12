@@ -1,5 +1,13 @@
 import { ResponseMeta, RestClient, RestClientOptions } from "@platform/infrastructure";
-import { UpstreamServiceError, UpstreamTimeoutError } from "@platform/core";
+import { RequestContext, UpstreamServiceError, UpstreamTimeoutError } from "@platform/core";
+
+function traceHeaders(context?: RequestContext): Record<string, string> {
+  if (!context) return {};
+  return {
+    "x-request-id": context.requestId,
+    ...(context.traceId !== undefined && { traceparent: context.traceId }),
+  };
+}
 
 export type NodeFetchRestClientConfig = {
   baseURL?: string;
@@ -63,7 +71,11 @@ export class NodeFetchRestClient implements RestClient {
     options?: RestClientOptions,
   ): Promise<{ data: T; meta: ResponseMeta }> {
     const resolvedUrl = this.resolveUrl(url);
-    const headers = { ...this.config.defaultHeaders, ...options?.headers };
+    const headers = {
+      ...traceHeaders(options?.context),
+      ...this.config.defaultHeaders,
+      ...options?.headers,
+    };
     const timeoutMs = options?.timeoutMs ?? this.config.defaultTimeoutMs;
 
     const isForm = headers["Content-Type"] === "application/x-www-form-urlencoded;charset=UTF-8";

@@ -1,4 +1,4 @@
-import { ApplicationError } from "./ApplicationError.js";
+import { ExtensibleError } from "../platform/index.js";
 import { UnexpectedError } from "./UnexpectedError.js";
 
 export type ApplicationResultSuccess<T> = {
@@ -22,16 +22,17 @@ export function toApplicationSuccess<T>(data: T): ApplicationResultSuccess<T> {
   return { ok: true, data };
 }
 
-// Errores que no son propios de la jerarquía de @platform/core (bugs, excepciones de terceros,
-// etc.) se envuelven en UnexpectedError en vez de armar un `type`/`origin` ad-hoc, para que
-// terminen con el mismo `type = "UnexpectedError"` que ya usa el resto de la plataforma.
+// Cualquier error del punto de extensión público (ApplicationError/DomainError/HttpError, todos
+// ExtensibleError — ver SKILL.md § Jerarquía de errores) conserva su type/origin/data propios.
+// PlatformError/AdapterError (errores DE la librería, no de negocio) y cualquier otra excepción
+// (bugs, terceros) se envuelven en UnexpectedError en vez de armar un `type`/`origin` ad-hoc.
 export function toApplicationFailure(err: unknown): ApplicationResultError {
-  const applicationError =
-    err instanceof ApplicationError
+  const structuredError =
+    err instanceof ExtensibleError
       ? err
       : new UnexpectedError(err instanceof Error ? err.message : undefined, err);
 
-  const { type, origin, description, data } = applicationError.toScalars();
+  const { type, origin, description, data } = structuredError.toScalars();
 
   return {
     ok: false,
@@ -42,4 +43,17 @@ export function toApplicationFailure(err: unknown): ApplicationResultError {
       ...(Object.keys(data).length > 0 && { data }),
     },
   };
+}
+
+// Evita el `if (result.ok) { ... } else { ... }` repetido en código que consume un
+// ApplicationResult fuera de un controller HTTP (donde ya existe toHttpResponse) — un listener de
+// eventos, un job, un test.
+export function matchApplicationResult<T, R>(
+  result: ApplicationResult<T>,
+  handlers: {
+    onSuccess: (data: T) => R;
+    onError: (error: ApplicationResultError["error"]) => R;
+  },
+): R {
+  return result.ok ? handlers.onSuccess(result.data) : handlers.onError(result.error);
 }

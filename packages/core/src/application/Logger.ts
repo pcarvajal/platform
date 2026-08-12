@@ -1,4 +1,15 @@
+import type { RequestContext } from "../platform/index.js";
+
 export type LogLevel = "error" | "info" | "warn" | "debug" | "silent";
+// Contraparte en runtime de LogLevel — necesaria para validar contra ella (p.ej. env.enum(LOG_LEVELS)
+// en @platform/env), ya que el union por sí solo no existe en tiempo de ejecución.
+export const LOG_LEVELS = [
+  "debug",
+  "info",
+  "warn",
+  "error",
+  "silent",
+] as const satisfies readonly LogLevel[];
 export type LogContext = Record<string, unknown>;
 
 const DEFAULT_SENSITIVE_KEYS = new Set([
@@ -58,4 +69,46 @@ export abstract class Logger {
   abstract error(message: string, context?: LogContext): void;
   abstract warn(message: string, context?: LogContext): void;
   abstract debug(message: string, context?: LogContext): void;
+
+  // Logger "atado" a un RequestContext: cada llamada de info/error/warn/debug lleva requestId
+  // (y traceId, si hay) mezclado en el context, sin que cada call site tenga que pasarlo a mano.
+  // Concreto (no abstract) porque delega en los métodos ya implementados por la subclase — ningún
+  // Logger existente (NodeConsoleLoggerClient, AWSLoggerClient, FakeLogger) necesita cambiar para
+  // soportarlo.
+  bind(context: RequestContext): Logger {
+    return new BoundLogger(this, context);
+  }
+}
+
+class BoundLogger extends Logger {
+  constructor(
+    private readonly delegate: Logger,
+    private readonly requestContext: RequestContext,
+  ) {
+    super();
+  }
+
+  override info(message: string, context?: LogContext): void {
+    this.delegate.info(message, this.withRequestContext(context));
+  }
+
+  override error(message: string, context?: LogContext): void {
+    this.delegate.error(message, this.withRequestContext(context));
+  }
+
+  override warn(message: string, context?: LogContext): void {
+    this.delegate.warn(message, this.withRequestContext(context));
+  }
+
+  override debug(message: string, context?: LogContext): void {
+    this.delegate.debug(message, this.withRequestContext(context));
+  }
+
+  private withRequestContext(context?: LogContext): LogContext {
+    return {
+      requestId: this.requestContext.requestId,
+      ...(this.requestContext.traceId !== undefined && { traceId: this.requestContext.traceId }),
+      ...context,
+    };
+  }
 }

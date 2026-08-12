@@ -3,6 +3,8 @@ export * from "./src/FakeLogger.js";
 export * from "./src/buildHttpRequest.js";
 export * from "./src/InMemoryCache.js";
 export * from "./src/FakeRestClient.js";
+export * from "./src/InMemoryIdempotencyStore.js";
+export * from "./src/buildMessageEnvelope.js";
 
 // El mismo doble de EventBus sirve para desarrollo local y para tests — vive en adapter-node
 // (es la implementación "de referencia" a ese nivel, sin dependencias externas) y se reexporta

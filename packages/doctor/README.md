@@ -2,7 +2,7 @@
 
 CLI chica (sin dependencias externas, `node:fs`/`node:path`) que confirma que la carpeta `src/` de un
 proyecto consumidor respeta la estructura de
-[`company-platform/SKILL.md`](../skills/company-platform/SKILL.md) § Estructura de carpetas — el primer
+[`platform/SKILL.md`](../skills/platform/SKILL.md) § Estructura de carpetas — el primer
 chequeo que cualquier otra herramienta de la plataforma (p. ej. `@platform/eslint-config`) asume como
 precondición.
 

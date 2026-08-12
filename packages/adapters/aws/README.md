@@ -3,7 +3,7 @@
 Implementación de referencia de la plataforma para correr un servicio como AWS Lambda detrás de
 API Gateway (REST o HTTP API, v1 y v2).
 
-Referencia completa: ver [`company-platform/SKILL.md`](../../skills/company-platform/SKILL.md)
+Referencia completa: ver [`platform/SKILL.md`](../../skills/platform/SKILL.md)
 § `infrastructure/deployment/`, tabla de primitivas HTTP.
 
 ## Qué provee

@@ -5,3 +5,4 @@ export * from "./EnvValidationError.js";
 export * from "./loadEnv.js";
 export * from "./schema/EnvValueSchema.js";
 export * from "./env.js";
+export * from "./appContext.js";

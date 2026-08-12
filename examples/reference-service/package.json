@@ -1,0 +1,27 @@
+{
+  "name": "example-reference-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "dev": "tsc && node --env-file-if-exists=.env.local dist/infrastructure/deployment/local/server.js",
+    "demo:consumer": "tsc && node dist/infrastructure/deployment/local/demoConsumer.js",
+    "doctor": "node ../../packages/doctor/dist/src/cli.js src"
+  },
+  "dependencies": {
+    "@platform/adapter-node": "workspace:*",
+    "@platform/core": "workspace:*",
+    "@platform/env": "workspace:*",
+    "@platform/infrastructure": "workspace:*",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@platform/doctor": "workspace:*",
+    "@platform/eslint-config": "workspace:*",
+    "@types/node": "^22.10.0",
+    "eslint": "^10.8.0",
+    "typescript": "^5.7.0"
+  }
+}
