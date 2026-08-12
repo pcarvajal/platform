@@ -2,10 +2,10 @@
 name: platform
 description: |
   Arquitectura hexagonal + DDD para construir aplicaciones sobre los paquetes de este monorepo
-  (@platform/core, /infrastructure, /adapter-aws, /adapter-node). Este archivo es el índice: filosofía,
-  instalación, y un mapa de qué archivo de references/ leer según la pregunta (estructura de carpetas,
-  jerarquía de errores, UseCase/ApplicationResult, primitivas HTTP, dominio, eventos, env, testing,
-  composición manual y anti-patrones).
+  (@platform/core, /infrastructure, /env, /adapter-aws, /adapter-node, /adapter-redis, /testing).
+  Este archivo es el índice: filosofía, instalación, y un mapa de qué archivo de references/ leer
+  según la pregunta (estructura de carpetas, jerarquía de errores, UseCase/ApplicationResult,
+  primitivas HTTP, dominio, eventos, env, testing, composición manual y anti-patrones).
 
   Usar cuando el usuario: crea una app o servicio nuevo sobre estos paquetes, decide dónde ubicar un
   caso de uso, entidad, repositorio o adaptador, estructura las carpetas de un proyecto backend nuevo,

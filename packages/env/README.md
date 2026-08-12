@@ -3,7 +3,8 @@
 Paquete para cargar y validar variables de entorno en proyectos construidos sobre `@platform/*`.
 Separa dos responsabilidades: obtener los valores crudos (por defecto, `process.env`) y validarlos
 contra un schema tipado, lanzando un error estructurado si algo falta o no tiene el formato
-esperado.
+esperado. También trae `env.appContext`, el preset con el contexto de aplicación obligatorio de
+esta convención (`APP_SERVICE_NAME`/`APP_ENVIRONMENT`/`APP_LOG_LEVEL`).
 
 No depende de ningún validador de terceros. Se apoya en [Standard Schema](https://standardschema.dev),
 la interfaz de interoperabilidad que ya implementan zod (≥3.24), valibot y arktype, de modo que
@@ -13,16 +14,19 @@ carga sin código adicional.
 ## Uso en un proyecto
 
 Se usa dentro del único punto donde el proyecto debe leer `process.env`
-(`src/infrastructure/env.ts` en la convención de `platform`):
+(`src/infrastructure/env.ts` en la convención de `platform`). `env.appContext(extra?)` es el punto
+de entrada esperado ahí — un `env.object` con el contexto de aplicación obligatorio
+(`APP_SERVICE_NAME`/`APP_ENVIRONMENT`/`APP_LOG_LEVEL`) ya cargado, extendido con lo que el proyecto
+necesite:
 
 ```ts
 // src/infrastructure/env.ts
 import { loadEnv, env } from "@platform/env";
 
-const schema = env.object({
-  PORT: env.number().default(3000),
-  DATABASE_URL: env.string(),
-  LOG_LEVEL: env.enum(["debug", "info", "warn", "error"]).default("info"),
+const schema = env.appContext({
+  PORT: env.port().default(3000),
+  DATABASE_URL: env.url(),
+  ALLOWED_ORIGINS: env.array(env.url()),
   FEATURE_X: env.boolean().optional(),
 });
 
@@ -31,12 +35,24 @@ const schema = env.object({
 export const config = loadEnv(schema);
 ```
 
-`config` queda tipado según el schema (`{ PORT: number; DATABASE_URL: string; LOG_LEVEL: "debug" |
-"info" | "warn" | "error"; FEATURE_X: boolean | undefined }`), y el resto del proyecto recibe esos
-valores ya parseados por inyección de dependencias, sin volver a tocar `process.env`.
+`config` queda tipado según el schema (`{ APP_SERVICE_NAME: string; APP_ENVIRONMENT: string;
+APP_LOG_LEVEL: "debug" | "info" | "warn" | "error" | "silent"; PORT: number; DATABASE_URL: string;
+ALLOWED_ORIGINS: string[]; FEATURE_X: boolean | undefined }`), y el resto del proyecto recibe esos
+valores ya parseados por inyección de dependencias, sin volver a tocar `process.env`. `extra` se
+spreadea antes que las tres keys del contexto, así que no puede pisarlas — solo puede agregar
+campos nuevos.
 
-Si el entorno no cumple el schema, `loadEnv` lanza `EnvValidationError` (extiende
-`ApplicationError` de `@platform/core`) con el detalle de cada variable inválida en `issues`.
+Si el entorno no cumple el schema (incluida la ausencia de alguna de las tres vars obligatorias),
+`loadEnv` lanza `EnvValidationError` (extiende `ApplicationError` de `@platform/core`) con el
+detalle de cada variable inválida en `issues`.
+
+Además de `object`/`string`/`number`/`boolean`/`enum` (usados arriba y en el ejemplo de zod más
+abajo), el builder trae `url()` (valida con `new URL()`), `port()` (entero 1-65535),
+`array(itemSchema, { separator? })` (split + valida cada token contra cualquier Standard Schema) y
+`json(schema?)` (parsea JSON y opcionalmente valida el resultado) — inventario completo con firmas
+exactas en [`references/env.md`](../skills/platform/references/env.md). Si un schema no necesita
+el contexto obligatorio (poco común fuera de `infrastructure/env.ts`), `env.object` sigue
+disponible directo.
 
 ### Cambiar a un validador de terceros
 
@@ -48,13 +64,20 @@ import { loadEnv } from "@platform/env";
 import { z } from "zod";
 
 const schema = z.object({
+  APP_SERVICE_NAME: z.string(),
+  APP_ENVIRONMENT: z.string(),
+  APP_LOG_LEVEL: z.enum(["debug", "info", "warn", "error", "silent"]),
   PORT: z.coerce.number().default(3000),
   DATABASE_URL: z.string(),
-  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
 });
 
 export const config = loadEnv(schema);
 ```
+
+`env.appContext` es un helper de este paquete, no algo que Standard Schema en sí provea — si
+`infrastructure/env.ts` migra por completo a zod/valibot/arktype, las tres keys del contexto
+obligatorio se declaran a mano ahí (como arriba), y `@platform/doctor` sigue validando que estén
+sin importar qué builder se usó para declararlas.
 
 ## Ventajas
 
@@ -67,5 +90,8 @@ export const config = loadEnv(schema);
 - **Errores consistentes con el resto de la librería.** `EnvValidationError` se integra en la
   misma jerarquía de errores (`toScalars()`, `origin`, `cause`) que ya usan `core` e
   `infrastructure`.
+- **Contexto de aplicación obligatorio, sin ceremonia extra.** `env.appContext(extra?)` carga
+  `APP_SERVICE_NAME`/`APP_ENVIRONMENT`/`APP_LOG_LEVEL` con la misma sintaxis que cualquier otro
+  schema, y `@platform/doctor` confirma que cada proyecto lo declara.
 - **Testeable.** `loadEnv` acepta una fuente de valores explícita en vez de leer `process.env`
   directamente, lo que permite probar `env.ts` sin mutar variables de entorno globales.
